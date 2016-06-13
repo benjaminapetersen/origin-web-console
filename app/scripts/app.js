@@ -25,6 +25,7 @@ angular
     'openshiftConsoleTemplates',
     'ui.ace',
     'extension-registry',
+    'key-value-editor',
     'as.sortable',
     'ui.select'
   ])
@@ -212,7 +213,7 @@ angular
       .when('/project/:project/browse/other', {
         templateUrl: 'views/other-resources.html',
         controller: 'OtherResourcesController'
-      })      
+      })
       .when('/project/:project/browse/persistentvolumeclaims/:pvc', {
         templateUrl: 'views/browse/persistent-volume-claim.html',
         controller: 'PersistentVolumeClaimController'
@@ -374,7 +375,7 @@ hawtioPluginLoader.registerPreBootstrapTask(function(next) {
     next();
     return;
   }
-  
+
   var api = {
     k8s: {},
     openshift: {}
@@ -382,7 +383,7 @@ hawtioPluginLoader.registerPreBootstrapTask(function(next) {
   var apis = {};
   var API_DISCOVERY_ERRORS = [];
   var protocol = window.location.protocol + "//";
-  
+
   // Fetch /api/v1 for legacy k8s resources, we will never bump the version of these legacy apis so fetch version immediately
   var k8sBaseURL = protocol + window.OPENSHIFT_CONFIG.api.k8s.hostPort + window.OPENSHIFT_CONFIG.api.k8s.prefix;
   var k8sDeferred = $.get(k8sBaseURL + "/v1")
@@ -396,7 +397,7 @@ hawtioPluginLoader.registerPreBootstrapTask(function(next) {
       xhr: jqXHR
     });
   });
-  
+
   // Fetch /oapi/v1 for legacy openshift resources, we will never bump the version of these legacy apis so fetch version immediately
   var osBaseURL = protocol + window.OPENSHIFT_CONFIG.api.openshift.hostPort + window.OPENSHIFT_CONFIG.api.openshift.prefix;
   var osDeferred = $.get(osBaseURL + "/v1")
@@ -410,10 +411,10 @@ hawtioPluginLoader.registerPreBootstrapTask(function(next) {
       xhr: jqXHR
     });
   });
-  
+
   // Fetch /apis to get the list of groups and versions, then fetch each group/
   // Because the api discovery doc returns arrays and we want maps, this creates a structure like:
-  // { 
+  // {
   //   extensions: {
   //     name: "extensions",
   //     preferredVersion: "v1beta1",
@@ -425,11 +426,11 @@ hawtioPluginLoader.registerPreBootstrapTask(function(next) {
   //           daemonsets: {
   //             /* resource returned from discovery API */
   //           }
-  //         }  
+  //         }
   //       }
   //     }
   //   }
-  // } 
+  // }
   var apisBaseURL = protocol + window.OPENSHIFT_CONFIG.apis.hostPort + window.OPENSHIFT_CONFIG.apis.prefix;
   var apisDeferred = $.get(apisBaseURL)
   .then(function(data) {
@@ -440,7 +441,7 @@ hawtioPluginLoader.registerPreBootstrapTask(function(next) {
         preferredVersion: apiGroup.preferredVersion.version,
         versions: {}
       };
-      apis[group.name] = group;      
+      apis[group.name] = group;
       _.each(apiGroup.versions, function(apiVersion) {
         var versionStr = apiVersion.version;
         group.versions[versionStr] = {
@@ -460,7 +461,7 @@ hawtioPluginLoader.registerPreBootstrapTask(function(next) {
         }));
       });
     });
-    return $.when.apply(this, apisDeferredVersions);    
+    return $.when.apply(this, apisDeferredVersions);
   }, function(data, textStatus, jqXHR) {
     API_DISCOVERY_ERRORS.push({
       data: data,

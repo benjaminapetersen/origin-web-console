@@ -142,7 +142,31 @@
                         <tbody ng-if="(builds | hashSize) == 0">
                           <tr><td colspan="3"><em>{{emptyMessage}}</em></td></tr>
                         </tbody>
-                        <tbody ng-repeat="build in orderedBuilds">
+<style>
+
+.fade-in-and-out {
+  transition: 1s linear all;
+  -webkit-transition: 1s linear all;
+}
+
+.fade-in-and-out.ng-enter {
+  opacity: 0;
+}
+
+.fade-in-and-out.ng-enter.ng-enter-active {
+  opacity: 1;
+}
+
+.fade-in-and-out.ng-leave {
+  opacity: 1;
+}
+
+.fade-in-and-out.ng-leave.ng-leave-active {
+  opacity: 0;
+}
+</style>
+
+                        <tbody ng-repeat="build in orderedBuilds" class="fade-in-and-out">
                           <tr>
                             <td data-title="Build">
                               <!-- Build number and link -->

@@ -19,7 +19,8 @@ angular.module('openshiftConsole')
                         Navigate,
                         ProjectsService,
                         LabelFilter,
-                        labelNameFilter) {
+                        labelNameFilter,
+                        $interval) {
     $scope.projectName = $routeParams.project;
     $scope.deploymentConfigName = $routeParams.deploymentconfig;
     $scope.deploymentConfig = null;
@@ -65,6 +66,7 @@ angular.module('openshiftConsole')
 
     var watches = [];
 
+
     ProjectsService
       .get($routeParams.project)
       .then(_.spread(function(project, context) {
@@ -85,6 +87,7 @@ angular.module('openshiftConsole')
           function(deploymentConfig) {
             $scope.loaded = true;
             $scope.deploymentConfig = deploymentConfig;
+
             updateHPAWarnings();
             ImageStreamResolver.fetchReferencedImageStreamImages([deploymentConfig.spec.template], $scope.imagesByDockerReference, $scope.imageStreamImageRefByDockerReference, context);
 
@@ -97,6 +100,20 @@ angular.module('openshiftConsole')
                 };
               }
               $scope.deploymentConfig = deploymentConfig;
+
+              // TEMP HACK TO MAKE SOME KEYS READONLY:
+              _.each(_.get($scope.deploymentConfig, 'spec.template.spec.containers'), function(container) {
+                _.each(container.env, function(env, i) {
+                  if(i < 1) {
+                    env.cannotDelete = true;
+                  }
+                  if(i < 2) {
+                    env.isReadonly = true;
+                  }
+                });
+              });
+              // END HACK
+
               updateHPAWarnings();
               ImageStreamResolver.fetchReferencedImageStreamImages([deploymentConfig.spec.template], $scope.imagesByDockerReference, $scope.imageStreamImageRefByDockerReference, context);
             }));
