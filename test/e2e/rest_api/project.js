@@ -24,7 +24,7 @@ var podsPage = require('../page_objects/podsPage.js');
 var servicesPage = require('../page_objects/servicesPage.js');
 var createProjectPage = require('../page_objects/createProjectPage.js');
 var addToProjectPage = require('../page_objects/addToProjectPage.js');
-
+var loginPage = require('../page_objects/loginPage.js');
 
 // TODO: share some config to pass to all methods in this file?
 var maxTimeout = 5000;
@@ -41,7 +41,8 @@ describe('e2e tests', function() {
     beforeEach(function() {
       // Want a longer browser size since the screenshot reporter only grabs the visible window
       win.resize();
-      user.login();
+      loginPage.visit();
+      loginPage.login();
     });
 
     afterEach(function() {
