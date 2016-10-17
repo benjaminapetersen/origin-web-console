@@ -9,7 +9,10 @@ export DISPLAY=':10'
 export SCREEN='0'
 Xvfb "${DISPLAY}" -screen "${SCREEN}" 1024x768x24 -ac &
 
-while ! xrandr --display "${DISPLAY}" --screen "${SCREEN}"; do
+# Debian versions of `xrandr` want `-display` whereas RPM
+# versions want `--display`, so we'll just use `-d` to
+# support both.
+while ! xrandr -d "${DISPLAY}" --screen "${SCREEN}"; do
 	sleep 0.2
 done
 
