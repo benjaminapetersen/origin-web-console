@@ -207,7 +207,9 @@ angular
           $scope.user = resp;
         });
 
-
+      // TODO:
+      // similar to this directive, but with a _.debounce() to avoid the flicker in the UI
+      // https://github.com/spadgett/origin-web-console/blob/bee47e4c56db4b4c623a7ec778f9adfcea4d4cdc/app/scripts/directives/istagSelect.js#L103-L117
       DataService.list('projects', {}, function(resp) {
         angular.extend($scope, {
           projects: _.map(resp.by('metadata.name'), function(project) {
