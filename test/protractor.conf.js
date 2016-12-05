@@ -88,6 +88,7 @@ exports.config = {
   // --suite=smoke,full only the patterns matched by the specified suites will
   // run.
   suites: {
+    'create-from-url': 'integration/create-from-url/*.js',
     // smoke: 'spec/smoketests/*.js',
     rest_api: 'integration/rest_api/*.js' // This suite of tests should only require a running master api, it should not require a node
     //e2e: 'integration/e2e.js'
@@ -222,10 +223,10 @@ exports.config = {
       baseDirectory: './test/tmp/screenshots',
       takeScreenShotsOnlyForFailedSpecs: true,
       pathBuilder: function pathBuilder(spec, descriptions, results, capabilities) {
-        // Return '<specname>' as path for screenshots: 
-        // Example: 'list-should work'. 
+        // Return '<specname>' as path for screenshots:
+        // Example: 'list-should work'.
         return descriptions.reverse().join(' ');
-      }       
+      }
     }));
   },
 
