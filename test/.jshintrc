@@ -19,6 +19,7 @@
   "undef": true,
   "unused": true,
   "globals": {
+    "ace": false,
     "after": false,
     "afterEach": false,
     "afterAll": false,
@@ -32,6 +33,7 @@
     "expect": false,
     "inject": false,
     "it": false,
+    "xit": false,
     "jasmine": false,
     "spyOn": false,
     "hawtioPluginLoader": false,
