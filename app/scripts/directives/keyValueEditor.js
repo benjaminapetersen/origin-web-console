@@ -1,0 +1,447 @@
+(function() {
+  'use strict';
+
+  angular
+    .module('openshiftConsole')
+    .directive('keyValueEditor', [
+      '$timeout',
+      '$window',
+      '$filter',
+      'keyValueEditorConfig',
+      function($timeout, $window, $filter, config) {
+
+        var humanizeKind = $filter('humanizeKind');
+        var canI = $filter('canI');
+
+        var counter = 1000;
+        var timeoutDelay = 25;
+
+        var newEntry = function() {
+          return {name: '', value: ''};
+        };
+
+        var addEntry = function(entries, entry) {
+          entries && entries.push(entry || newEntry());
+        };
+
+        var addEntryWithSelectors = function(entries) {
+          entries && entries.push({
+            name: '',
+            valueFrom: {
+              selected: null,
+              key: null
+            }
+          });
+        };
+
+        var setFocusOn = function(selector, value) {
+          // $timeout just delays enough to ensure event/$digest resolution
+          $timeout(function() {
+            var element = _.first($window.document.querySelectorAll(selector));
+            if(element) {
+              element.focus();
+              // if setting value, this will set the cursor at the end of the text in the value
+              if(value) {
+                element.value = '';
+                element.value = value;
+              }
+            }
+          }, timeoutDelay);
+        };
+
+        var uniqueForKey = function(unique, $index) {
+          return 'key-value-editor-key-' + unique + '-' + $index;
+        };
+
+        var uniqueForValue = function(unique, $index) {
+          return 'key-value-editor-value-' + unique + '-' + $index;
+        };
+
+        var altTextForValueFrom = function(entry, namespace) {
+          if(entry.value) {
+            return;
+          }
+          if(!entry.valueFrom) {
+            return;
+          }
+          entry.valueIcon = 'pficon pficon-help';
+          entry.valueIconTooltip = 'This is a referenced value that will be generated when a container is created.  On running pods you can check the resolved values by going to the Terminal tab and echoing the environment variable.';
+          var opts = {
+            config: 'configMapKeyRef',
+            secret: 'secretKeyRef',
+            field: 'fieldRef'
+          };
+          if(entry.valueFrom[opts.config]) {
+            entry.apiObj = { // so we can use navigateResourceURL in the template
+              kind: "ConfigMap",
+              metadata: {
+                name: entry.valueFrom[opts.config].name,
+                namespace: namespace
+              }
+            };
+            entry.refType = opts.config; // copy refType to the object so it's easier to get at in the template
+          } else if(entry.valueFrom[opts.secret]) {
+            entry.apiObj = { // so we can use navigateResourceURL in the template
+              kind: "Secret",
+              metadata: {
+                name: entry.valueFrom[opts.secret].name,
+                namespace: namespace
+              }
+            };
+            entry.refType = opts.secret; // copy refType to the object so it's easier to get at in the template
+            entry.valueIcon = 'fa fa-user-secret';
+          } else if(entry.valueFrom[opts.field]) {
+            entry.refType = opts.field; // copy refType to the object so it's easier to get at in the template
+            entry.valueAlt = 'Set to the field ' + entry.valueFrom.fieldRef.fieldPath + ' in current object';
+            entry.isReadonlyValue = true;
+          } else {
+            entry.valueAlt = 'Set to a reference on a ' + _.first(_.keys(entry.valueFrom));
+            entry.isReadonlyValue = true;
+          }
+        };
+
+        // if the current user does not have the permissions to see these resources, we will need a
+        // readonly state of that entry row (at least for the value)
+        var setEntryPerms = function(entry, canIGetSecrets, canIGetConfigMaps) {
+          if(!entry.valueFrom) {
+            return;
+          }
+          if(entry.valueFrom.configMapKeyRef) {
+            if(!canIGetConfigMaps) {
+              entry.isReadonlyValue = true;
+            }
+          }
+          if(entry.valueFrom.secretKeyRef) {
+            if(!canIGetSecrets) {
+              entry.isReadonlyValue = true;
+            }
+          }
+        };
+
+        return {
+          restrict: 'AE',
+          scope: {
+            keyMinlength: '@',                        // min character length
+            keyMaxlength: '@',                        // max character length
+            valueMinlength: '@',                      // min character length
+            valueMaxlength: '@',                      // max character length
+            // entries: [{
+            //  name: 'foo',
+            //  value: 'bar',
+            //  isReadonly: true|| false              // individual entries may be readonly
+            //  isReadonlyKey: true || false          // key name on an individual entry is readonly
+            //  cannotDelete: true || false           // individual entries can be permanent
+            //  keyValidator: '',                     // regex string
+            //  valueValidator: ''                    // regex string
+            //  keyValidatorError: '',                // custom validation error
+            //  valueValidatorError: ''               // custom validation error
+            //  valueIcon: '',                        // icon class, such as 'fa fa-lock'
+            //  valueIconTooltip: ''                  // text for tooltip
+            // }]
+            entries: '=',
+            namespace: '=',
+            keyPlaceholder: '@',
+            valuePlaceholder: '@',
+            keyValidator: '@',                        // general key regex validation string
+            keyValidatorRegex: '=',                   // a regex object
+            valueValidator: '@',                      // general value regex validation string
+            valueValidatorRegex: '=',                 // a regex object
+            keyValidatorError: '@',                   // general key validation error message
+            keyValidatorErrorTooltip: '@',
+            keyValidatorErrorTooltipIcon: '@',
+            valueValidatorError: '@',                 // general value validation error message
+            valueValidatorErrorTooltip: '@',
+            valueValidatorErrorTooltipIcon: '@',
+            valueIconTooltip: '@',                    // if the tooltip for the value icon is generic
+            valueFromSelectorOptions: '=',
+            cannotAdd: '=?',
+            cannotSort: '=?',
+            cannotDelete: '=?',
+            isReadonly: '=?',
+            isReadonlyValue: '=?',
+            isReadonlyKeys: '=?',                     // will only apply to existing keys,
+            addRowLink: '@',                          // creates a link to "add row" and sets its text label
+            addRowWithSelectorsLink: '@',             // creates a link to "add row with selectors" and sets its text label
+            showHeader: '=?',                         // show placeholder text as headers
+            allowEmptyKeys: '=?',
+            keyRequiredError: '@'
+          },
+          templateUrl: 'views/directives/key-value-editor.html',
+          link: function($scope, $elem, $attrs) {
+            var unwatchEntries;
+
+            // validation is irritating.
+            $scope.validation = {
+              key: $scope.keyValidator,
+              val: $scope.valueValidator
+            };
+            // override if we get a regex literal
+            if($attrs.keyValidatorRegex) {
+              $scope.validation.key = $scope.keyValidatorRegex;
+            }
+            if($attrs.valueValidatorRegex) {
+              $scope.validation.val = $scope.valueValidatorRegex;
+            }
+
+            if('grabFocus' in $attrs) {
+              $scope.grabFocus = true;
+              // after render set to undefined to ensure it doesn't keep trying to grab focus
+              $timeout(function() {
+                  $scope.grabFocus = undefined;
+              });
+            }
+
+            // if an attribute exists, set its corresponding bool to true
+            if('cannotAdd' in $attrs) {
+              $scope.cannotAdd = true;
+            }
+            if('cannotDelete' in $attrs) {
+              $scope.cannotDeleteAny = true;
+            }
+            if('isReadonly' in $attrs) {
+              $scope.isReadonlyAny = true;
+            }
+            // only applies to the initial set, if a user adds an entry the
+            // user must be allowed to set the key!
+            if('isReadonlyKeys' in $attrs) {
+              // the $scope.$watch here lets us wait until we are certain we get
+              // a legitimate first set, perhaps after a promise resolution, run the
+              // update, then unregister.
+              unwatchEntries = $scope.$watch('entries', function(newVal) {
+                if(newVal) {
+                  _.each($scope.entries, function(entry) {
+                    entry.isReadonlyKey = true;
+                  });
+                  unwatchEntries();
+                }
+              });
+            }
+
+            if('cannotSort' in $attrs) {
+              $scope.cannotSort = true;
+            }
+
+            if('showHeader' in $attrs) {
+              $scope.showHeader = true;
+            }
+
+            if('allowEmptyKeys' in $attrs) {
+              $scope.allowEmptyKeys = true;
+            }
+
+            $scope.groupByKind = function(object) {
+              return humanizeKind(object.kind);
+            };
+
+            $scope.valueFromObjectSelected = function(entry, selected) {
+              if (selected.kind === 'ConfigMap') {
+                entry.valueFrom.configMapKeyRef = {
+                  name: selected.metadata.name
+                };
+                delete entry.valueFrom.secretKeyRef;
+              } else if (selected.kind === 'Secret') {
+                entry.valueFrom.secretKeyRef = {
+                  name: selected.metadata.name
+                };
+                delete entry.valueFrom.configMapKeyRef;
+              }
+              delete entry.valueFrom.key;
+            };
+
+            $scope.valueFromKeySelected = function(entry, selected) {
+              if (entry.valueFrom.configMapKeyRef) {
+                entry.valueFrom.configMapKeyRef.key = selected;
+                return;
+              } else if (entry.valueFrom.secretKeyRef) {
+                entry.valueFrom.secretKeyRef.key = selected;
+                return;
+              }
+            };
+
+            // min/max lengths
+            angular.extend($scope, {
+              keyMinlength: config.keyMinlength || $attrs.keyMinlength,
+              keyMaxlength: config.keyMaxlength || $attrs.keyMaxlength,
+              valueMinlength: config.valueMinlength || $attrs.valueMinlength,
+              valueMaxlength: config.valueMaxlength || $attrs.valueMaxlength,
+              // validation regex
+              keyValidator: config.keyValidator || $attrs.keyValidator,
+              valueValidator: config.valueValidator || $attrs.valueValidator,
+              keyValidatorError: config.keyValidatorError || $attrs.keyValidatorError,
+              valueValidatorError: config.valueValidatorError || $attrs.valueValidatorError,
+              keyRequiredError: config.keyRequiredError || $attrs.keyRequiredError,
+              // validation error tooltip
+              keyValidatorErrorTooltip: config.keyValidatorErrorTooltip || $attrs.keyValidatorErrorTooltip,
+              keyValidatorErrorTooltipIcon: config.keyValidatorErrorTooltipIcon || $attrs.keyValidatorErrorTooltipIcon,
+              valueValidatorErrorTooltip: config.valueValidatorErrorTooltip || $attrs.valueValidatorErrorTooltip,
+              valueValidatorErrorTooltipIcon: config.valueValidatorErrorTooltipIcon || $attrs.valueValidatorErrorTooltipIcon,
+              // placeholders
+              keyPlaceholder: config.keyPlaceholder || $attrs.keyPlaceholder,
+              valuePlaceholder: config.valuePlaceholder || $attrs.valuePlaceholder
+            });
+          },
+          controller: [
+            '$scope',
+            '$timeout',
+            function($scope) {
+              var readOnlySome = [];
+              var cannotDeleteSome = [];
+              var unique = counter++;
+              var canIGetSecrets = canI('secrets', 'get');
+              var canIGetConfigMaps = canI('configmaps', 'get');
+
+              angular.extend($scope, {
+                canGetSecretsAndConfigMaps: canIGetSecrets && canIGetConfigMaps,
+                unique: unique,
+                forms: {},
+                placeholder: newEntry(),
+                setFocusKeyClass: 'key-value-editor-set-focus-key-' + unique,
+                setFocusValClass: 'key-value-editor-set-focus-value-' + unique,
+                uniqueForKey: uniqueForKey,
+                uniqueForValue: uniqueForValue,
+                dragControlListeners: {
+                    // only allow sorting within the parent instance
+                    accept: function (sourceItemHandleScope, destSortableScope) {
+                      return sourceItemHandleScope.itemScope.sortableScope.$id === destSortableScope.$id;
+                    },
+                    orderChanged: function() {
+                      $scope.forms.keyValueEditor.$setDirty();
+                    }
+                },
+                deleteEntry: function(start, deleteCount) {
+                  $scope.entries.splice(start, deleteCount);
+                  // if the link is used, add a new empty entry to ensure the inputs do not all disappear
+                  if(!$scope.entries.length && $scope.addRowLink) {
+                    addEntry($scope.entries);
+                  }
+                  $scope.forms.keyValueEditor.$setDirty();
+                },
+                isReadonlySome: function(name) {
+                  return _.contains(readOnlySome, name);
+                },
+                cannotDeleteSome: function(name) {
+                  return _.contains(cannotDeleteSome, name);
+                },
+                onAddRow: function() {
+                  addEntry($scope.entries);
+                  setFocusOn('.'+ $scope.setFocusKeyClass);
+                },
+                onAddRowWithSelectors: function() {
+                  addEntryWithSelectors($scope.entries);
+                  setFocusOn('.'+ $scope.setFocusKeyClass);
+                }
+              });
+
+              // Issue #78 todo:
+              // https://github.com/openshift/angular-key-value-editor/issues/78
+              // cannotDelete and isReadonly are boolean or list values.
+              // if boolean, they apply to all.
+              // if arrays, they apply to the items passed.
+              // GOTCHA:
+              // we suppport:
+              //   <key-value-editor is-readonly cannot-delete>
+              // and:
+              //   <key-value-editor is-readonly="['foo']" cannot-delete="['foo','bar']">
+              // changing the is-readonly and cannot-delete to a list and then
+              // setting the list to undefined/null will not:
+              //   cannotDeleteAny = false;
+              // why?
+              //   we assume the presence of is-readonly similar to disabled and other html
+              //   attributes that are 'truthy' though they have no actual value.
+              // workaround?
+              //   potentially using ng-attr-cannot-delete=false?
+              $scope.$watch('cannotDelete', function(newVal) {
+                if(angular.isArray(newVal)) {
+                  $scope.cannotDeleteAny = false;
+                  cannotDeleteSome = newVal;
+                }
+              });
+              $scope.$watch('isReadonly', function(newVal) {
+                if(angular.isArray(newVal)) {
+                  $scope.isReadonlyAny = false;
+                  readOnlySome = newVal;
+                }
+              });
+
+              // watching the attribute allows both:
+              // <key-value-editor add-row-link>
+              // <key-value-editor add-row-link="Add a pair">
+              $scope.$watch('addRowLink', function(newVal) {
+                $scope.addRowLink = newVal || 'Add row';
+                if($scope.entries && !$scope.entries.length) {
+                  addEntry($scope.entries);
+                }
+              });
+
+              // TODO: factor this up to the top & out of the controller,
+              // and potentially into the service.
+              var findConfigMap = function(entry) {
+                return {
+                  object: _.find($scope.valueFromSelectorOptions, function(option) {
+                    return option.kind === 'ConfigMap' &&
+                           option.metadata.name === entry.valueFrom.configMapKeyRef.name;
+                  }),
+                  key: entry.valueFrom.configMapKeyRef.key
+                };
+              };
+
+              var findSecret = function(entry) {
+                return  {
+                  object: _.find($scope.valueFromSelectorOptions, function(option) {
+                    return option.kind === 'Secret' &&
+                           option.metadata.name === entry.valueFrom.secretKeyRef.name;
+                  }),
+                  key: entry.valueFrom.secretKeyRef.key
+                };
+              };
+
+              var findReferenceValue = function(entry) {
+                var ref = null;
+                if(entry.valueFrom.configMapKeyRef) {
+                  ref = findConfigMap(entry);
+                } else if(entry.valueFrom.secretKeyRef) {
+                  ref = findSecret(entry);
+                }
+                return ref;
+              };
+
+              var findReferenceValueForEntries = function(entries) {
+                _.each(entries, function(entry) {
+                  var referenceValue;
+                  if(entry.valueFrom) {
+                    referenceValue = findReferenceValue(entry);
+                    if (referenceValue) {
+                      _.set(entry, 'valueFrom.selected', referenceValue.object);
+                      _.set(entry, 'valueFrom.key', referenceValue.key);
+                    }
+                  }
+                });
+              };
+
+              // ensures we always have at least one set of inputs
+              $scope.$watch('entries', function(newVal) {
+                // entries MUST be an array. if we get an empty array,
+                // we add an empty entry to ensure the inputs show.
+                // NOTE: entries must be an array, with a .push() method
+                // else addEntry() will fail.
+                if(newVal && !newVal.length) {
+                  addEntry($scope.entries);
+                }
+                // check valueFrom attribs and set an alt text for display if present
+                _.each($scope.entries, function(entry) {
+                  altTextForValueFrom(entry, $scope.namespace);
+                  setEntryPerms(entry, canIGetSecrets, canIGetConfigMaps);
+                });
+                findReferenceValueForEntries(newVal);
+              });
+
+              $scope.$watch('valueFromSelectorOptions', function() {
+                findReferenceValueForEntries($scope.entries);
+              });
+
+            }
+          ]
+        };
+      }]);
+
+})();
