@@ -1,16 +1,14 @@
 'use strict';
 
-var _ = require('lodash');
-var Page = require('./page').Page;
+const Page = require('./page').Page;
 
-var DeploymentsPage = function(project) {
-  this.project = project;
-};
-
-_.extend(DeploymentsPage.prototype, Page.prototype, {
-  getUrl: function() {
+class DeploymentsPage extends Page {
+  constructor(project, menu) {
+    super(project, menu);
+  }
+  getUrl() {
     return 'project/' + this.project.name + '/browse/deployments';
   }
-});
+}
 
 exports.DeploymentsPage = DeploymentsPage;

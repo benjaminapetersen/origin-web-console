@@ -1,32 +1,29 @@
 'use strict';
 
-var h = require('../helpers');
-var scroll = require('../helpers/scroll');
-var _ = require('lodash');
-var Page = require('./page').Page;
-//var logger = require('../helpers/logger');
+const h = require('../helpers');
+const Page = require('./page').Page;
+const scroller = require('../helpers/scroll'); 
 
-var CreateFromTemplatePage = function(project, template) {
-  this.project = project;
-  this.template = template;
-};
-
-_.extend(CreateFromTemplatePage.prototype, Page.prototype, {
-  getUrl: function() {
-    var url = 'project/' + this.project.name + '/create/fromtemplate';
+class CreateFromTemplatePage extends Page {
+  constructor(project, menu) {
+    super(project, menu);
+  }
+  getUrl() {
+    let url = 'project/' + this.project.name + '/create/fromtemplate';
     if(this.template) {
       url += '?template='+this.template.name; //+'&namespace='; may need template namespace...
     }
     return url;
-  },
-  clickCreate: function() {
-    scroll.toBottom();
-    var button = element(by.buttonText('Create'));
-    h.waitForElem(button);
-    return button.click().then(function() {
-      return new require('./overview').OverviewPage(this.project);
-    }.bind(this));
   }
-});
+  clickCreate() {
+    scroller.toBottom();
+    let button = element(by.buttonText('Create'));
+    h.waitForElem(button);
+    return button.click().then(() => {
+      const OverviewPage = require('./overview').OverviewPage;
+      return new OverviewPage(this.project);
+    });
+  }
+}
 
 exports.CreateFromTemplatePage = CreateFromTemplatePage;

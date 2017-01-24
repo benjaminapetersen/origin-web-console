@@ -1,12 +1,10 @@
 'use strict';
 
-var h = require('../helpers.js');
-var _ = require('lodash');
-var inputs = require('../helpers/inputs');
-var Page = require('./page').Page;
-//var logger = require('../helpers/logger');
+const h = require('../helpers.js');
+const inputs = require('../helpers/inputs');
+const Page = require('./page').Page;
 
-var AddTemplateModal = function(project) {
+let AddTemplateModal = function(project) {
   this.project = project;
   this.modal = element(by.css('.modal-dialog'));
   this.checkboxes = this.modal.all(by.css('input[type="checkbox"]'));
@@ -33,62 +31,59 @@ var AddTemplateModal = function(project) {
   };
 };
 
-var CatalogPage = function(project) {
-  this.project = project;
-};
-
-_.extend(CatalogPage.prototype, Page.prototype, {
-  getUrl: function() {
-    // ?tab=tab=fromFile, ?tab=fromCatalog, ?tab=deployImage
+class CatalogPage extends Page {
+  constructor(project, menu) {
+    super(project, menu);
+  }
+  getUrl() {
+    // TODO: ?tab=tab=fromFile, ?tab=fromCatalog, ?tab=deployImage
     return 'project/' + this.project.name + '/create';
-  },
-  // TODO: push this up into Page, include a way to pass tab names to the constructor &
-  // auto generate clickTab<name>() functions?
-  _findTabs: function() {
-    var tabs = element(by.css('.nav-tabs'));
+  }
+  _findTabs() {
+    let tabs = element(by.css('.nav-tabs'));
     h.waitForElem(tabs);
     return tabs;
-  },
-  clickBrowseCatalog: function() {
+  }
+  clickBrowseCatalog() {
     return this._findTabs()
                .element(by.cssContainingText('a', 'Browse Catalog'))
                .click();
-  },
-  clickDeployImage: function() {
+  }
+  clickDeployImage() {
     return this._findTabs()
                .element(by.cssContainingText('a', 'Deploy Image'))
                .click();
-  },
-  clickImport: function() {
+  }
+  clickImport() {
     return this._findTabs()
                .element(by.cssContainingText('a', 'Import YAML / JSON'))
                .click();
-  },
-  setImportValue: function(str) {
-    return browser.executeScript(function(value) {
+  }
+  setImportValue(str) {
+    return browser.executeScript((value) => {
       window.ace.edit('add-component-editor').setValue(value);
     }, str);
-  },
-  getImportValue: function() {
-    return browser.executeScript(function() {
+  }
+  getImportValue() {
+    return browser.executeScript(() => {
       return window.ace.edit('add-component-editor').getValue();
     });
-  },
-  submitImport: function() {
+  }
+  submitImport() {
     element(by.cssContainingText('.btn-primary','Create')).click();
-    return browser.sleep(500).then(function() {
+    return browser.sleep(500).then(() => {
       return new AddTemplateModal(this.project);
-    }.bind(this));
-  },
-  processTemplate: function(templateStr) {
+    });
+  }
+  processTemplate(templateStr) {
     this.clickImport();
-    return this.setImportValue(templateStr).then(function() {
-      return this.submitImport().then(function(addTemplateModal) {
+    return this.setImportValue(templateStr).then(() => {
+      return this.submitImport().then((addTemplateModal) => {
         // implicit nav therefore returns new CreateFromTemplatePage()
         return addTemplateModal.process();
       });
-    }.bind(this));
+    });
   }
-});
+}
 
 exports.CatalogPage = CatalogPage;
