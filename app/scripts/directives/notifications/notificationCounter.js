@@ -12,27 +12,16 @@ angular
         function($scope, notifications) {
         $scope.count = 0;
         $scope.countDisplay = $scope.count;
-        $scope.hideDrawer = true;
-        $scope.notificationGroups = [{
-          heading: 'heading',
-          subheading: 'subjeading',
-          notifications: [{
-            unread: true,
-            message: 'message 1',
-            status: 'info'
-          }, {
-            unread: true,
-            message: 'message 2',
-            status: 'info'
-          }]
-        }];
-        $scope.actionCallback = function() {
-          console.log('hello world.');
-        };
-        $scope.show = function() {
+        var drawerHidden = true; 
+
+        $scope.onClick = function() {
           $scope.$applyAsync(function() {
             $scope.count = 0;
             $scope.hideDrawer = false;
+          });
+          drawerHidden = !drawerHidden;
+          notifications.publish('notification-drawer:show', {
+            drawerHidden: drawerHidden
           });
         };
         notifications.subscribe('notification:new', function() {
@@ -43,13 +32,9 @@ angular
                                     '! !'; // TODO: a "too many!" indicator
           });
         });
-
-        setInterval(function() {
-          notifications.publish('notification:new', { foo: 'bar ' + $scope.count });
-        }, 4000);
       }],
       link: function() {
-        console.log('notification-counter.link()');
+        console.log('notification-counter.link()'); // just ensuring it renders
       },
       templateUrl: 'views/directives/notifications/notification-counter.html'
     };
