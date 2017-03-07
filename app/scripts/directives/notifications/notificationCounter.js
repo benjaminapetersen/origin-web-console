@@ -7,7 +7,7 @@ angular
       restrict: 'AE',
       scope: {},
       controller:
-        function($scope, $rootScope, notifications) {
+        function($scope, $routeParams, $rootScope, notifications) {
         $scope.count = 0;
         $scope.countDisplay = $scope.count;
         var drawerHidden = true;
@@ -15,27 +15,26 @@ angular
         $scope.onClick = function() {
           $scope.$applyAsync(function() {
             $scope.count = 0;
-            drawerHidden = !!drawerHidden;
           });
           drawerHidden = !drawerHidden;
           $rootScope.$emit('notification-drawer:show', {
             drawerHidden: drawerHidden
           });
         };
-        var off = $rootScope.$on('notification:new', function(evt, data) {
-          $scope.$applyAsync(function() {
-            $scope.count++;
-            $scope.countDisplay = $scope.count < 100 ?
-                                    $scope.count:
-                                    '! !'; // TODO: a "too many!" indicator
-          });
+
+        // TODO: just need to know if there is a "new" notification worth viewing,
+        // don't need to give the user a ping for every time the watch returns data
+        var subscription = notifications.subscribe($routeParams.project, function(groups) {
+          $scope.groups = groups;
+          $scope.count++;
+          $scope.countDisplay = $scope.count < 100 ?
+                                  $scope.count:
+                                  '! !'; // TODO: a "too many!" indicator
         });
+
         $scope.$on('$destroy', function() {
-          off();
+          notifications.unsubscribe(subscription);
         });
-      },
-      link: function() {
-        console.log('notification-counter.link()'); // just ensuring it renders
       },
       templateUrl: 'views/directives/notifications/notification-counter.html'
     };

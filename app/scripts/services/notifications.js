@@ -7,77 +7,99 @@ angular
       var cache;
       var cacheKey = 'notifications';
       var storageType = 'sessionStorage';
-      var watches = [];
       var load = function() {
         return JSON.parse(window[storageType].getItem(cacheKey) || '{}');
       };
-      // TODO: whenver a user takes an action, we need to save the cache
       var save = function(data) {
         window[storageType].setItem(cacheKey, JSON.stringify(data));
       };
-      // groups is a long running object to avoid flickering UI.
       var groups = {};
       var processEvents = function(data) {
-        // count: Object.keys(data.by('metadata.name')).length
-        // messages: _.map(data.by('metadata.name'), 'message')
         _.each(data.by('metadata.name'), function(event) {
-          groups[event.involvedObject.name] = groups[event.involvedObject.name] || {
-            heading: event.involvedObject.name,
+          var namespace = event.involvedObject.namespace;
+          var name = event.involvedObject.name;
+          var uid = event.metadata.uid;
+
+          groups[namespace] = groups[namespace] || {};
+          groups[namespace][name] = groups[namespace][name] || {
+            heading: name,
             subheading: event.involvedObject.kind,
             notifications: {}
           };
-          groups[event.involvedObject.name].notifications[event.metadata.uid] = {
-            unread:  !_.get(cache, [event.metadata.namespace, event.metadata.uid, 'read']),
+          groups[namespace][name].notifications[event.metadata.uid] = {
+            unread:  !_.get(cache, [namespace, uid, 'read']),
             message: event.message,
-            lastTimestamp: event.lastTimestamp, // moment(event.lastTimestamp).format('LLL') -> March 6, 2017 3:15 PM
+            // moment(event.lastTimestamp).format('LLL') -> March 6, 2017 3:15 PM (human readable)
+            lastTimestamp: event.lastTimestamp,
             metadata: event.metadata,
             status: 'info',
             timestamp: null,
             actions: null
           };
         });
-        return _.map(groups, function(group) {
-          group.notifications = _.map(group.notifications, function(notification) {
-            return notification;
-          });
-          return group;
-        });
+
+        // the pf-notification-drawer requires arrays, it uses [].forEach rather than
+        // angular.forEach([]) internally.  Opening a bug as this could be more flexible:
+        // https://github.com/patternfly/angular-patternfly/issues/429
+        return _.reduce(
+                groups,
+                function(result, next, key) {
+                  result[key] = _.values(next);
+                  result[key].notifications = _.map(result[key].notifications, function(notification) {
+                    return notification;
+                  });
+                  return result;
+                }, {});
       };
 
+      // TODO: consider LRUcache for limiting # of items we track,
+      // provided that it can .dump() for us to store something in sessionStorage
       cache = load();
 
+      var subscriptions = {};
 
       return {
         // subscribe to notifications for a given project
         // will setup DataService.watch('events') for that project,
         // process any cached data we have against the events being
         // watched, & call the callback function.
-        subscribe: function(projName, fn) {
-          watches.push(DataService.watch('events', {namespace: projName}, function(data) {
-            // TODO: process events using the cache & return.
-            // perhaps we have to use a single object & share it, as the source
-            // of truth, so the UI doesn't flicker.  :/
-            // fn(process(events, cache[projectName]));
-            fn(processEvents(data));
-          }));
+        subscribe: function(projName, cb) {
+          // TODO: polling? do we need it?
+          if(!subscriptions[projName]) {
+            subscriptions[projName] = {
+              callbacks: [],
+              watch: DataService.watch('events', {namespace: projName}, function(data) {
+                _.each(subscriptions[projName].callbacks, function(callback) {
+                  callback(processEvents(data));
+                });
+              })
+            };
+          }
+          var cbIndex = (subscriptions[projName].callbacks.push(cb) -1);
+          // handler to lookup cb when later unsubscribing
+          return {
+            projectName: projName,
+            cbIndex: cbIndex
+          };
         },
-        // do we need to have a publish?
+        // do we need a publish, to allow others to publish to the subscribed channels?
         publish: function() {
           console.log('publish', arguments);
         },
-        // TODO:
-        // to cleanup.
-        // currently calling this cleans up all the watches.  this is not ideal.
-        // each controller/directive needs to be able to handle its own destiny.
-        // perhaps we simply return the key to the controller.
-        unsubscribe: function() {
-          DataService.unwatch(watches);
+        // takes the object returned from .subscribe()
+        // eliminates the callback form the list
+        // closes the watch if it is no longer needed
+        unsubscribe: function(handler) {
+          subscriptions[handler.projectName].callbacks.splice(handler.cbIndex, 1);
+          if(!subscriptions[handler.projectName].callbacks.length) {
+            DataService.unwatch(subscriptions[handler.projectName].watch);
+          }
         },
         markUnread: function(notification) {
           notification.unread = false;
           _.set(cache, [notification.metadata.namespace, notification.metadata.uid], {
             read: true,
-            timestamp: Date.now() // TODO: in case we need to flush this cache...
+            timestamp: Date.now() // TODO: in case we need to limit the cache
           });
           save(cache);
         }

@@ -21,7 +21,6 @@ angular
           name: 'Action 1',
           title: 'Action 1 title'
         }];
-        var watches = [];
 
         angular.extend($scope, {
           drawerHidden: true,
@@ -53,24 +52,20 @@ angular
           }
         });
 
+        // event from other nodes (counter) to signal the drawer to open/close
         $rootScope.$on('notification-drawer:show', function(evt, data) {
-          console.log('notification-drawer:show', data);
           $scope.$applyAsync(function() {
             $scope.drawerHidden = data.drawerHidden;
           });
         });
 
-        notifications.subscribe($routeParams.project, function(notificationGroups) {
-          console.log('well?', notificationGroups);
-          $scope.notificationGroups = notificationGroups;
+        var subscription = notifications.subscribe($routeParams.project, function(notificationGroups) {
+          $scope.notificationGroups = notificationGroups[$routeParams.project];
         });
 
-        $scope.$on('$destroy', function(){
-          DataService.unwatchAll(watches);
+        $scope.$on('$destroy', function() {
+          notifications.unsubscribe(subscription);
         });
-      },
-      link: function() {
-        //console.log('notificationDrawerWrapper.link()');
       },
       templateUrl: 'views/directives/notifications/notification-drawer-wrapper.html'
     };
