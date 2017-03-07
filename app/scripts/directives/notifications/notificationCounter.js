@@ -6,25 +6,23 @@ angular
     return {
       restrict: 'AE',
       scope: {},
-      controller: [
-        '$scope',
-        'notifications',
-        function($scope, notifications) {
+      controller:
+        function($scope, $rootScope, notifications) {
         $scope.count = 0;
         $scope.countDisplay = $scope.count;
-        var drawerHidden = true; 
+        var drawerHidden = true;
 
         $scope.onClick = function() {
           $scope.$applyAsync(function() {
             $scope.count = 0;
-            $scope.hideDrawer = false;
+            drawerHidden = !!drawerHidden;
           });
           drawerHidden = !drawerHidden;
-          notifications.publish('notification-drawer:show', {
+          $rootScope.$emit('notification-drawer:show', {
             drawerHidden: drawerHidden
           });
         };
-        notifications.subscribe('notification:new', function() {
+        var off = $rootScope.$on('notification:new', function(evt, data) {
           $scope.$applyAsync(function() {
             $scope.count++;
             $scope.countDisplay = $scope.count < 100 ?
@@ -32,7 +30,10 @@ angular
                                     '! !'; // TODO: a "too many!" indicator
           });
         });
-      }],
+        $scope.$on('$destroy', function() {
+          off();
+        });
+      },
       link: function() {
         console.log('notification-counter.link()'); // just ensuring it renders
       },

@@ -1,79 +1,94 @@
 'use strict';
 
-// NOTE: this could easily be abstracted into a generic event handler to be used
-// by notifications, alert messages, etc.
 angular
   .module('openshiftConsole')
   .factory('notifications',
     function($rootScope, $routeParams, DataService) {
-
-      // watching the project, when it changes, we can update the events
-      // we are subscribed to & the cache as well.
-      $rootScope.$watch(function() {
-        return $routeParams;
-      }, function(newVal) {
-        console.log('watch fn changed?', newVal);
-        // TODO:
-        // should process incoming events, which is going to be a
-        // merge w/the existing, ensuring we keep user data for the new,
-        // ie, if its "seen" that should persist.
-        // var notificationGroups = process(newVal)
-        // notify(notificationGroups);
-      }, true);
-
-      // cache needs to look something like this:
-      // a processed form of the events coming from the server.
-      // cache = {
-      //  projectName: { dc: events: [], bc: events: [], etc: [] }
-      //}
-      var cache = JSON.parse(localStorage.getItem('events')) || {};
-      var channels = {
-        all: []
+      var cache;
+      var cacheKey = 'notifications';
+      var storageType = 'sessionStorage';
+      var watches = [];
+      var load = function() {
+        return JSON.parse(window[storageType].getItem(cacheKey) || '{}');
       };
-      var noSubscriber = function(channel, data) {
-        Logger.log('No subscriber for', channel, data);
+      // TODO: whenver a user takes an action, we need to save the cache
+      var save = function(data) {
+        window[storageType].setItem(cacheKey, JSON.stringify(data));
       };
+      // groups is a long running object to avoid flickering UI.
+      var groups = {};
+      var processEvents = function(data) {
+        // count: Object.keys(data.by('metadata.name')).length
+        // messages: _.map(data.by('metadata.name'), 'message')
+        _.each(data.by('metadata.name'), function(event) {
+          groups[event.involvedObject.name] = groups[event.involvedObject.name] || {
+            heading: event.involvedObject.name,
+            subheading: event.involvedObject.kind,
+            notifications: {}
+          };
+          groups[event.involvedObject.name].notifications[event.metadata.uid] = {
+            unread:  !_.get(cache, [event.metadata.namespace, event.metadata.uid, 'read']),
+            message: event.message,
+            lastTimestamp: event.lastTimestamp, // moment(event.lastTimestamp).format('LLL') -> March 6, 2017 3:15 PM
+            metadata: event.metadata,
+            status: 'info',
+            timestamp: null,
+            actions: null
+          };
+        });
+        return _.map(groups, function(group) {
+          group.notifications = _.map(group.notifications, function(notification) {
+            return notification;
+          });
+          return group;
+        });
+      };
+
+      cache = load();
+
 
       return {
-        // subscribe to a specific channel:
-        //   notifications.subscribe('foo/bar', function() { })
-        // or all notifications:
-        //   notifications.subscribe('all', function() { })
-        //   notifications.subscribe(function() { })
-        subscribe: function(channel, cb) {
-          if(!cb && _.isFunction(channel)) {
-            cb = channel;
-            channel = 'all';
-          }
-          if(!channels[channel]) {
-            channels[channel] = [];
-          }
-          var idx = (channels[channel].push(cb) -1);
-          // returns a handler that can be handled either by/or:
-          // handler.ubsubscribe();
-          // notifications.unsubscribe(handler);
-          return {
-            id: idx,
-            unsubscribe: function() {
-              channels[channel].splice(idx, 1);
-            }
-          };
+        // subscribe to notifications for a given project
+        // will setup DataService.watch('events') for that project,
+        // process any cached data we have against the events being
+        // watched, & call the callback function.
+        subscribe: function(projName, fn) {
+          watches.push(DataService.watch('events', {namespace: projName}, function(data) {
+            // TODO: process events using the cache & return.
+            // perhaps we have to use a single object & share it, as the source
+            // of truth, so the UI doesn't flicker.  :/
+            // fn(process(events, cache[projectName]));
+            fn(processEvents(data));
+          }));
         },
-        // to publish to a particular channel:
-        //   publish('foo/bar', { foo: 'bar', baz: 'shizzle' })
-        // handlers in the channels.all category will receive all notifications
-        // for all channels.
-        publish: function(channel, data) {
-          if((!channels[channel] || !channels[channel].length)) {
-            noSubscriber(channel, data);
-          }
-          _.each([].concat(channels[channel], channels.all), function(subscriber) {
-            subscriber && subscriber(data);
+        // do we need to have a publish?
+        publish: function() {
+          console.log('publish', arguments);
+        },
+        // TODO:
+        // to cleanup.
+        // currently calling this cleans up all the watches.  this is not ideal.
+        // each controller/directive needs to be able to handle its own destiny.
+        // perhaps we simply return the key to the controller.
+        unsubscribe: function() {
+          DataService.unwatch(watches);
+        },
+        markUnread: function(notification) {
+          notification.unread = false;
+          _.set(cache, [notification.metadata.namespace, notification.metadata.uid], {
+            read: true,
+            timestamp: Date.now() // TODO: in case we need to flush this cache...
           });
-        },
-        unsubscribe: function(handle) {
-          handle && handle.unsubscribe && handle.unsubscribe();
+          save(cache);
         }
-        // TODO: retrieve() fn && cache obj to pull notifications from a history?
       };
     });
+
+
+//
+// link: function() {
+//   notifications.subscribe(function(groupedEvents) {
+//
+//   });
+//   notifications.unsubscribe();
+// }
