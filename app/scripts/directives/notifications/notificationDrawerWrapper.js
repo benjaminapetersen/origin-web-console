@@ -9,14 +9,17 @@ angular
       restrict: 'AE',
       scope: {},
       controller: [
+        '$routeParams',
         '$scope',
         '$interval',
+        'DataService',
         'notifications',
-        function($scope, $interval, notifications) {
+        function($routeParams, $scope, $interval, DataService, notifications) {
           var actions = [{
             name: 'Action 1',
             title: 'Action 1 title'
           }];
+          var watches = [];
 
           angular.extend($scope, {
             drawerHidden: true,
@@ -26,28 +29,7 @@ angular
             toggleShowDrawer: function() {
               $scope.hideDrawer = !$scope.hideDrawer;
             },
-            notificationGroups: [{
-              // TODO: link to the resource page if possible?
-              heading: 'mongodb',
-              subHeading: 'Deployment Config',
-              notifications: [{
-                unread: true,
-                // TODO: this is text straight back from the event itself.
-                // should we reformat it?  I imagine we have to deal with it as it is...
-                message: 'Created new replication controller \"mongodb-2\" for version 2',
-                status: 'info',
-                timeStamp: Date.now(),
-                actions: actions
-              }, {
-                message: 'Created new replication controller \"mongodb-3\" for version 3',
-                status: 'info',
-                unread: true
-              }, {
-                message: 'Created new replication controller \"mongodb-4\" for version 4',
-                status: 'info',
-                unread: false
-              }]
-            }],
+            notificationGroups: [],
             actionButtonTitle: 'Mark All Read',
             actionButtonCallback: function() {
               console.log('drawer.actionCallback() - Mark All Read');
@@ -83,6 +65,48 @@ angular
             });
           });
 
+          // the directive is destroyed & recreated on every page change.
+          // - this is handy since we can see the project change...
+          // - this is not handy as we are creating & tearing down the watch over and over...
+          //   - but, we do this on every page.
+          watches.push(DataService.watch('events', { namespace: $routeParams.project },function(data) {
+            console.log('events', data.by('metadata.name'));
+            console.log('event count:', Object.keys(data.by('metadata.name')).length);
+            console.log('messages:', _.map(data.by('metadata.name'), 'message'));
+            var notificationGroupMap = {};
+            _.each(data.by('metadata.name'), function(event) {
+              // TODO: namespace relevance?
+              notificationGroupMap[event.involvedObject.name] = notificationGroupMap[event.involvedObject.name] || {
+                heading: event.involvedObject.name,
+                subheading: event.involvedObject.kind,
+                notifications: []
+              };
+              notificationGroupMap[event.involvedObject.name].notifications.push({
+                unread: true,
+                message: event.message,
+                status: 'info',
+                timestamp: null,
+                actions: null
+              });
+            });
+
+            $scope.notificationGroups = _.map(notificationGroupMap, function(group) {
+              return group;
+            });
+            // TODO: publish out new events sets? count them? who should own this?
+            // - Directives shouldn't really own this... thats odd.  Service should own it,
+            //   publish it out to the 2 directives, the counter & the notification drawer.
+            // - Directives can talk back to the service for this data.
+            // - But, need the service "alive" right away, when the app starts up.  Is this a
+            //   valid use of 'run'?
+            // - how to keep track of read, unread, and persist this in storage?
+            //   - event.metadata.uid is unique
+            //   - event.metadata.creationTimestamp gives a date
+            // - how to purge old data but keep the new?
+          }, function() {
+            console.log('MASSIVE EPIC FAILS YO, FAILS SO HARD');
+          }));
+
           // TODO: Do we need a service behind this to cache the events?
           // it looks like events fire frequently & maintain some history naturally...
           // notifications.subscribe('notification:new', function(data) {
@@ -90,6 +114,10 @@ angular
           //     console.log('drawer data:', data);
           //   });
           // });
+
+          $scope.$on('$destroy', function(){
+            DataService.unwatchAll(watches);
+          });
         }
       ],
       link: function() {
