@@ -1,6 +1,16 @@
 'use strict';
 /*jshint esversion: 6 */
 
+exports.setInputValue = function(name, value) {
+  var input = element(by.model(name));
+  waitForElem(input);
+  input.clear();
+  input.sendKeys(value);
+  expect(input.getAttribute("value")).toBe(value);
+  return input;
+};
+
+
 // is a pain to get an array of input values because .getAttribute()
 // is a promise
 const getInputValues = (inputs) => {
