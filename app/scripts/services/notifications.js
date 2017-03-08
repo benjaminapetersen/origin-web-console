@@ -19,7 +19,11 @@ angular
           var namespace = event.involvedObject.namespace;
           var name = event.involvedObject.name;
           var uid = event.metadata.uid;
-
+          // TODO: filtering options:
+          // - event.type: Normal, Warning, etc.
+          // - event.reason: Created, Started, Pulled, DeploymentCreated, DeadlineExceeded, Scheduled, FailedSync, etc.
+          // - eliminating history, mongodb-1-deploy, mongodb-2-deploy, mongodb-3-deploy, etc
+          // - sort by involvedObject.kind (Pod, DeploymentConfig, )
           groups[namespace] = groups[namespace] || {};
           groups[namespace][name] = groups[namespace][name] || {
             heading: name,
@@ -30,9 +34,10 @@ angular
             unread:  !_.get(cache, [namespace, uid, 'read']),
             message: event.message,
             // moment(event.lastTimestamp).format('LLL') -> March 6, 2017 3:15 PM (human readable)
-            lastTimestamp: event.lastTimestamp,
+            timeStamp: event.lastTimestamp,
             metadata: event.metadata,
-            status: 'info',
+            involvedObject: event.involvedObject,
+            status: event.type,
             timestamp: null,
             actions: null
           };
@@ -69,6 +74,7 @@ angular
             subscriptions[projName] = {
               callbacks: [],
               watch: DataService.watch('events', {namespace: projName}, function(data) {
+                console.log('events', data.by('metadata.name'));
                 _.each(subscriptions[projName].callbacks, function(callback) {
                   callback(processEvents(data));
                 });
