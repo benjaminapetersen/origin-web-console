@@ -44,7 +44,7 @@ angular
               });
             },
             markRead: function(notification) {
-              notifications.markUnread(notification);
+              notifications.markRead(notification);
             },
             getNotficationStatusIconClass: function(notification) {
               return statuses[notification.status] || statusClasses.info;
@@ -60,7 +60,9 @@ angular
         });
 
         var subscription = notifications.subscribe($routeParams.project, function(notificationGroups) {
-          $scope.notificationGroups = notificationGroups[$routeParams.project];
+          console.log('what we got?', notificationGroups);
+          $scope.notificationGroups = [];
+//          $scope.notificationGroups = notificationGroups[$routeParams.project];
         });
 
         $scope.$on('$destroy', function() {
