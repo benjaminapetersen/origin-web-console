@@ -23,6 +23,14 @@
   <span
     class="drawer-pf-notification-message"
     ng-click="customScope.markRead(notification)">{{notification.message}}</span>
+    <br />
+    <!-- TODO: eliminate, this is for filtering -->
+  <span style="font-size: 0.8em; color: #666;">
+    {{notification.status}},
+    {{notification.reason}},
+    {{notification.involvedObject.kind}},
+    {{notification.involvedObject.name}}
+  </span>
   <div
     class="drawer-pf-notification-info"
     ng-click="customScope.markRead(notification)">

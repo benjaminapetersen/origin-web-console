@@ -60,9 +60,7 @@ angular
         });
 
         var subscription = notifications.subscribe($routeParams.project, function(notificationGroups) {
-          console.log('what we got?', notificationGroups);
-          $scope.notificationGroups = [];
-//          $scope.notificationGroups = notificationGroups[$routeParams.project];
+          $scope.notificationGroups = notificationGroups[$routeParams.project] || [];
         });
 
         $scope.$on('$destroy', function() {

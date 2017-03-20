@@ -20,7 +20,7 @@ angular
       return {
         sort: function(type, reason, kind, name, message) {
           var msg = `${name}: ${message}`;
-          var tier1 = `${kind} ${reason}`;
+          //var tier1 = `${kind} ${reason}`;
           cachedEvents[kind] = cachedEvents[kind] || {};
           cachedEvents[kind][reason] = cachedEvents[kind][reason] || {};
           cachedEvents[kind][reason][type] = cachedEvents[kind][reason][type] || [];
@@ -28,10 +28,10 @@ angular
             cachedEvents[kind][reason][type].unshift(msg);
             // no need to keep excessive records...
           }
-          // if we want to limit...
-          // if(cachedEvents[kind][reason][type].length > 15) {
-          //   cachedEvents[kind][reason][type].length = 15;
-          // }
+          // // if we want to limit...
+          if(cachedEvents[kind][reason][type].length > 6) {
+            cachedEvents[kind][reason][type].length = 6;
+          }
           // cachedEvents[tier1] = cachedEvents[tier1] || {};
           // cachedEvents[tier1][type] = cachedEvents[tier1][type] || [];
           // if(!_.contains(cachedEvents[tier1][type], msg)) {
@@ -52,13 +52,14 @@ angular
       var save = function(data) {
         window[storageType].setItem(cachedUserActionsKey, JSON.stringify(data));
       };
-      var cachedProcessedEvents;
+      var cachedProcessedEvents = {};
       var getTypeIndex = function(type) {
         // TODO: verify these are correct
         var indexes = {
           // Applications
           DeploymentConfig: 0,
           ReplicationController: 0,
+          ReplicaSet: 0,
           Deployment: 0,
           StatefulSet: 0,
           Pod: 0,
@@ -66,11 +67,12 @@ angular
           Route: 0,
           HorizontalPodAutoscaler: 0,
           // Builds
+          BuildConfig: 1,
           Build: 1,
           Pipeline: 1,
           ImageStream: 1,
           // Storage
-          PVC: 2
+          PersistentVolumeClaim: 2
         };
         var index = indexes[type];
         if(typeof index !== 'number') {
@@ -79,6 +81,10 @@ angular
           console.warn('MISSING INDEX:', type, APIService.kindToResource(type));
         }
         return indexes[type];
+      };
+      var isImportantEvent = function(event) {
+        console.log('isImportantEvent');
+        return true;
       };
       // TRELLO for adding build events:
       // https://trello.com/c/YiK7d5gs/1149-3-create-events-for-started-completed-failed-builds-builds
@@ -101,14 +107,18 @@ angular
         if(!data) {
           return []; // TODO: fix mo' betta
         };
-        cachedProcessedEvents = _.reduce(data.by('metadata.name'), function(result, event) {
+        console.log('process', _.keys(data.by('metadata.name')).length);
+        console.log('cache', cachedProcessedEvents);
+        _.each(data.by('metadata.name'), function(event) {
           var namespace = event.involvedObject.namespace;
+          var type = event.type;
+          // TODO: type, reason, kind....
           var name = event.involvedObject.name;
           var uid = event.metadata.uid;
           var kind = event.involvedObject.kind;
           var index = getTypeIndex(kind);
-          // there are 3 arrays in the result, each has a specific use:
-          result[namespace] = result[namespace] ||  [{
+          // there are 3 arrays for each namespace, matching the current menu structure:
+          cachedProcessedEvents[namespace] = cachedProcessedEvents[namespace] ||  [{
             heading: 'Applications',
             // Applications: Deployments, Pods, StatefulSets, Services, Routes
             notifications: []
@@ -121,21 +131,26 @@ angular
             // Storage: PVC
             notifications: []
           }];
-          // make the notification object:
-          result[namespace][index].notifications.push({
+          if(!cachedProcessedEvents[namespace][index]) {
+            console.warn('missing, add to index list!', cachedProcessedEvents, namespace, index);
+          }
+          if(!isImportantEvent(event)) {
+            return;
+          }
+          cachedProcessedEvents[namespace][index].notifications.push({
             unread:  !_.get(cachedUserActions, [namespace, uid, 'read']),
             message: event.message,
             timestamp: event.lastTimestamp,
             metadata: event.metadata,
             involvedObject: event.involvedObject,
             status: event.type,
+            reason: event.reason,
             actions: null
           });
           // console.log('[', event.type, '>', event.reason, event.involvedObject.kind,']', '(', event.involvedObject.name, ')');
           // console.log('   ', event.message);
           eventTypeOrganizer.sort(event.type, event.reason, event.involvedObject.kind, event.involvedObject.name, event.message);
-          return result;
-        }, {});
+        });
         return cachedProcessedEvents;
       };
 
