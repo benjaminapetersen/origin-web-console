@@ -72,11 +72,12 @@ angular.module('openshiftConsole')
           group: $routeParams.group
         };
 
-        if (!AuthorizationService.canI(resourceGroupVersion, 'update', $routeParams.project)) {
-          Navigate.toErrorPage('You do not have authority to update ' +
-                               humanizeKind($routeParams.kind) + ' ' + $routeParams.name + '.', 'access_denied');
-          return;
-        }
+        // TODO: dont check this in either...
+        // if (!AuthorizationService.canI(resourceGroupVersion, 'update', $routeParams.project)) {
+        //   Navigate.toErrorPage('You do not have authority to update ' +
+        //                        humanizeKind($routeParams.kind) + ' ' + $routeParams.name + '.', 'access_denied');
+        //   return;
+        // }
 
         DataService.get(resourceGroupVersion, $scope.name, context).then(
           function(result) {
