@@ -93,19 +93,24 @@
       <div class="section-title">
         Bindings
       </div>
-      <span ng-if="!row.instanceBindings.length">There are no bindings.</span>
+      <span ng-if="!row.bindings.length">There are no bindings.</span>
       <div
-        ng-if="row.instanceBindings.length"
+        ng-if="row.bindings.length"
         class="row"
-        ng-repeat="binding in row.instanceBindings">
-        <div class="col-sm-4">
+        ng-repeat="binding in row.bindings">
+        <div class="col-sm-5">
           <span>{{binding.metadata.name}}</span>
         </div>
-        <div class="col-sm-8">
+        <div class="col-sm-7">
           <!-- TODO: follow-on PR
           <a ng-href="{{binding | navigateResourceURL}}">View configuration details</a>
           -->
-          <a href="{{row.getSecretForBinding(binding) | navigateResourceURL}}">
+          <span ng-if="!row.showSecretLink(binding)">
+            <status-icon status="'Pending'"></status-icon> Pending
+          </span>
+          <a
+            ng-if="row.showSecretLink(binding)"
+            href="{{row.getSecretForBinding(binding) | navigateResourceURL}}">
             View secret
           </a>
         </div>

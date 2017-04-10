@@ -11496,7 +11496,7 @@ angular.module('openshiftConsoleTemplates', []).run(['$templateCache', function(
     "Provisioned Services\n" +
     "</h2>\n" +
     "<div class=\"list-pf\">\n" +
-    "<service-instance-row ng-repeat=\"serviceInstance in overview.state.orderedServiceInstances\" api-object=\"serviceInstance\" state=\"overview.state\"></service-instance-row>\n" +
+    "<service-instance-row ng-repeat=\"serviceInstance in overview.state.orderedServiceInstances\" api-object=\"serviceInstance\" bindings=\"overview.state.bindingsByInstanceRef[serviceInstance.metadata.name]\" state=\"overview.state\"></service-instance-row>\n" +
     "</div>\n" +
     "</div>\n" +
     "</div>\n" +
@@ -12680,14 +12680,17 @@ angular.module('openshiftConsoleTemplates', []).run(['$templateCache', function(
     "<div class=\"section-title\">\n" +
     "Bindings\n" +
     "</div>\n" +
-    "<span ng-if=\"!row.instanceBindings.length\">There are no bindings.</span>\n" +
-    "<div ng-if=\"row.instanceBindings.length\" class=\"row\" ng-repeat=\"binding in row.instanceBindings\">\n" +
-    "<div class=\"col-sm-4\">\n" +
+    "<span ng-if=\"!row.bindings.length\">There are no bindings.</span>\n" +
+    "<div ng-if=\"row.bindings.length\" class=\"row\" ng-repeat=\"binding in row.bindings\">\n" +
+    "<div class=\"col-sm-5\">\n" +
     "<span>{{binding.metadata.name}}</span>\n" +
     "</div>\n" +
-    "<div class=\"col-sm-8\">\n" +
+    "<div class=\"col-sm-7\">\n" +
     "\n" +
-    "<a href=\"{{row.getSecretForBinding(binding) | navigateResourceURL}}\">\n" +
+    "<span ng-if=\"!row.showSecretLink(binding)\">\n" +
+    "<status-icon status=\"'Pending'\"></status-icon> Pending\n" +
+    "</span>\n" +
+    "<a ng-if=\"row.showSecretLink(binding)\" href=\"{{row.getSecretForBinding(binding) | navigateResourceURL}}\">\n" +
     "View secret\n" +
     "</a>\n" +
     "</div>\n" +

@@ -37,13 +37,13 @@ function BindService($filter,
     ctrl.gotoStep(ctrl.steps[0]);
   };
 
-  var statusCondition = $filter('statusCondition');
+  var statusConditionReady = $filter('statusConditionReady');
   ctrl.$onChanges = function(changes) {
     if (changes.serviceInstances && !ctrl.serviceToBind) {
       var newestReady;
       var newestNotReady;
       _.each(ctrl.serviceInstances, function(instance) {
-        var ready = _.get(statusCondition(instance, 'Ready'), 'status') === 'True';
+        var ready = statusConditionReady(instance);
         if (ready && (!newestReady || instance.metadata.creationTimestamp > newestReady.metadata.creationTimestamp)) {
           newestReady = instance;
         }

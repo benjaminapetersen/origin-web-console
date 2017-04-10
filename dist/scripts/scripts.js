@@ -19,6 +19,7 @@ recentPipelinesByDeploymentConfig:{},
 routesByService:{},
 servicesByObjectUID:{},
 serviceInstances:{},
+bindingsByInstanceRef:{},
 showMetrics:!1
 };
 d.getAlerts().forEach(function(a) {
@@ -461,7 +462,9 @@ pollInterval:x
 group:"servicecatalog.k8s.io",
 resource:"bindings"
 }, c, function(a) {
-L.bindings = a.by("metadata.name"), Va(c), da();
+L.bindings = a.by("metadata.name"), L.bindingsByInstanceRef = _.reduce(L.bindings, function(a, b) {
+return a[b.spec.instanceRef.name] || (a[b.spec.instanceRef.name] = []), a[b.spec.instanceRef.name].push(b), a;
+}, {}), Va(c), da();
 }, {
 poll:w,
 pollInterval:x
@@ -523,12 +526,12 @@ view:"views/directives/bind-service/results.html"
 } ], d.$onInit = function() {
 d.gotoStep(d.steps[0]);
 };
-var e = a("statusCondition");
+var e = a("statusConditionReady");
 d.$onChanges = function(a) {
 if (a.serviceInstances && !d.serviceToBind) {
 var b, c;
 _.each(d.serviceInstances, function(a) {
-var d = "True" === _.get(e(a, "Ready"), "status");
+var d = e(a);
 d && (!b || a.metadata.creationTimestamp > b.metadata.creationTimestamp) && (b = a), d || c && !(a.metadata.creationTimestamp > c.metadata.creationTimestamp) || (c = a);
 }), d.serviceToBind = _.get(b, "metadata.name") || _.get(c, "metadata.name");
 }
@@ -872,21 +875,19 @@ _.set(h, "overlay.panelVisible", !0), _.set(h, "overlay.panelName", a), _.set(h,
 function ServiceInstanceRow(a, b, c, d) {
 var e = this;
 _.extend(e, c.ui);
-var f = a("getErrorDetails"), g = function() {
+var f = a("getErrorDetails"), g = a("statusConditionReady"), h = function() {
 var a = e.apiObject.spec.serviceClassName, b = e.apiObject.metadata.name, c = _.get(e, [ "state", "serviceClasses", a, "osbMetadata", "displayName" ]);
 return c || a || b;
-}, h = function() {
+}, i = function() {
 var a = e.apiObject.spec.serviceClassName;
 return _.get(e, [ "state", "serviceClasses", a, "description" ]);
-}, i = function() {
-return _.filter(e.state.bindings, function(a) {
-return a.spec.instanceRef.name === e.apiObject.metadata.name;
-});
 };
 e.$onChanges = function() {
-e.notifications = c.getNotifications(e.apiObject, e.state), e.displayName = g(), e.description = h(), e.instanceBindings = i();
+e.notifications = c.getNotifications(e.apiObject, e.state), e.displayName = h(), e.description = i();
 }, e.getSecretForBinding = function(a) {
 return a && _.get(e, [ "state", "secrets", a.spec.secretName ]);
+}, e.showSecretLink = function(a) {
+return g(a);
 }, e.deprovision = function() {
 var a = {
 alerts:{
@@ -13744,7 +13745,8 @@ controller:[ "$filter", "DataService", "ListRowUtils", "$uibModal", ServiceInsta
 controllerAs:"row",
 bindings:{
 apiObject:"<",
-state:"<"
+state:"<",
+bindings:"<"
 },
 templateUrl:"views/overview/_service-instance-row.html"
 }), angular.module("openshiftConsole").component("overviewNetworking", {
@@ -14786,12 +14788,20 @@ c && (b && !moment(c.finishedAt).isAfter(b) || (b = c.finishedAt));
 }), b;
 };
 }).filter("statusCondition", function() {
+return function(a) {
+return a ? _.first(_.get(a, "status.conditions")) :null;
+};
+}).filter("statusConditionIs", function() {
 return function(a, b) {
 return a ? _.find(_.get(a, "status.conditions"), {
 type:b
 }) :null;
 };
-}).filter("routeIngressCondition", function() {
+}).filter("statusConditionReady", [ "statusConditionFilter", function(a) {
+return function(b) {
+return "True" === _.get(a(b, "Ready"), "status");
+};
+} ]).filter("routeIngressCondition", function() {
 return function(a, b) {
 return a ? _.find(a.conditions, {
 type:b

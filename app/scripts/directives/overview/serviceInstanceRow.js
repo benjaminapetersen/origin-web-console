@@ -11,7 +11,8 @@ angular.module('openshiftConsole').component('serviceInstanceRow', {
   controllerAs: 'row',
   bindings: {
     apiObject: '<',
-    state: '<'
+    state: '<',
+    bindings: '<'
   },
   templateUrl: 'views/overview/_service-instance-row.html'
 });
@@ -21,7 +22,8 @@ function ServiceInstanceRow($filter, DataService, rowMethods, $uibModal) {
   _.extend(row, rowMethods.ui);
 
   var getErrorDetails = $filter('getErrorDetails');
-
+  var statusConditionReady = $filter('statusConditionReady');
+  
   var getDisplayName = function() {
     var serviceClassName = row.apiObject.spec.serviceClassName;
     var instanceName = row.apiObject.metadata.name;
@@ -44,13 +46,15 @@ function ServiceInstanceRow($filter, DataService, rowMethods, $uibModal) {
     row.notifications = rowMethods.getNotifications(row.apiObject, row.state);
     row.displayName = getDisplayName();
     row.description = getDescription();
-    row.instanceBindings = getBindings();
   };
 
   row.getSecretForBinding = function(binding) {
     return binding && _.get(row, ['state', 'secrets', binding.spec.secretName]);
   };
 
+  row.showSecretLink = function(binding) {
+    return statusConditionReady(binding);
+  };
 
   row.deprovision = function() {
     var modalScope = {

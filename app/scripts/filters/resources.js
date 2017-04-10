@@ -1084,13 +1084,32 @@ angular.module('openshiftConsole')
       return lastFinishTime;
     };
   })
+  // gets the first status condition.
   .filter('statusCondition', function() {
+    return function(apiObject) {
+      if (!apiObject) {
+        return null;
+      }
+
+      return _.first(_.get(apiObject, 'status.conditions'));
+    };
+  })
+  // gets the status condition that matches provided type
+  // statusConditionIs(object, 'Ready')
+  .filter('statusConditionIs', function() {
     return function(apiObject, type) {
       if (!apiObject) {
         return null;
       }
 
       return _.find(_.get(apiObject, 'status.conditions'), {type: type});
+    };
+  })
+  // returns true/false based on the presence of a Ready status conditions
+  // statusConditionReady(obj)
+  .filter('statusConditionReady', function(statusConditionFilter) {
+    return function(apiObject) {
+      return _.get(statusConditionFilter(apiObject, 'Ready'), 'status') === 'True';
     };
   })
   .filter('routeIngressCondition', function() {
