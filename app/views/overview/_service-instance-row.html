@@ -14,13 +14,18 @@
           </div>
         </h3>
         <div class="status-icons">
+          <!--
+            TODO: this should show an info status icon if the apiObject is not yet ready.
+          -->
           <notification-icon ng-if="!row.expanded" alerts="row.notifications"></notification-icon>
+          <span ng-if="!row.isReady">
+            <status-icon status="row.status"></status-icon> {{row.statusReason | sentenceCase}}
+          </span>
         </div>
       </div>
     </div>
 
-    <div
-      class="list-pf-content hidden-xs hidden-sm">
+    <div class="list-pf-content hidden-xs hidden-sm">
       <div class="list-pf-content-right">
         <div>
           <strong ng-if="!row.instanceBindings.length">No Bindings</strong>

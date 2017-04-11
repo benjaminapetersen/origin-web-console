@@ -22,8 +22,9 @@ function ServiceInstanceRow($filter, DataService, rowMethods, $uibModal) {
   _.extend(row, rowMethods.ui);
 
   var getErrorDetails = $filter('getErrorDetails');
+  var statusCondition = $filter('statusCondition');
   var statusConditionReady = $filter('statusConditionReady');
-  
+
   var getDisplayName = function() {
     var serviceClassName = row.apiObject.spec.serviceClassName;
     var instanceName = row.apiObject.metadata.name;
@@ -46,6 +47,9 @@ function ServiceInstanceRow($filter, DataService, rowMethods, $uibModal) {
     row.notifications = rowMethods.getNotifications(row.apiObject, row.state);
     row.displayName = getDisplayName();
     row.description = getDescription();
+    row.status = statusCondition(row.apiObject).status;
+    row.statusReason = statusCondition(row.apiObject).reason;
+    row.isReady = statusConditionReady(row.apiObject);
   };
 
   row.getSecretForBinding = function(binding) {
