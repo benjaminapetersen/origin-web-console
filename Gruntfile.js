@@ -14,6 +14,9 @@ var serveStatic = require('serve-static');
 module.exports = function (grunt) {
   var contextRoot = grunt.option('contextRoot') || "dev-console";
   var isMac = /^darwin/.test(process.platform) || grunt.option('mac');
+  var argBrowser = grunt.option('browser') || "firefox";
+  var argBrowsers = grunt.option('browsers') ? grunt.option('browsers').split(',') : ['Firefox'];
+  var argBaseUrl = grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/");
 
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt, {
@@ -584,9 +587,7 @@ module.exports = function (grunt) {
         // grunt test
         // grunt test --browsers=Chrome
         // grunt test --browsers=Chrome,Firefox,Safari (be sure karma-<browser_name>-launcher is installed)
-        browsers: grunt.option('browsers') ?
-                    grunt.option('browsers').split(',') :
-                    ['Firefox']
+        browsers: argBrowsers
       }
     },
 
@@ -598,15 +599,15 @@ module.exports = function (grunt) {
         args: {
           // Arguments passed to the command
           suite: grunt.option('suite') || 'full',
-          baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/")
+          baseUrl: argBaseUrl
         }
       },
       default: {
         options: {
           configFile: "test/protractor.conf.js", // Target-specific config file
           args: {
-            baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-            browser: grunt.option('browser') || "firefox"
+            baseUrl: argBaseUrl,
+            browser: argBrowser
           } // Target-specific arguments
         }
       },
@@ -614,8 +615,8 @@ module.exports = function (grunt) {
         options: {
           configFile: "test/protractor-mac.conf.js", // Target-specific config file
           args: {
-            baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-            browser: grunt.option('browser') || "firefox"
+            baseUrl: argBaseUrl,
+            browser: argBrowser
           } // Target-specific arguments
         }
       }
