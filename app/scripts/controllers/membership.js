@@ -275,6 +275,9 @@ angular
             project: project,
             subjectKinds: subjectKinds,
             canUpdateRolebindings: canI('rolebindings', 'update', projectName),
+            makeRemoveTitle: function(roleName, subjectName) {
+              return 'remove ' + roleName + ' from ' + subjectName;
+            },
             confirmRemove: function(subjectName, kindName, roleName) {
               var redirectToProjectList = null;
               var modalScope = createModalScope(subjectName, kindName, roleName, $scope.user.metadata.name);
