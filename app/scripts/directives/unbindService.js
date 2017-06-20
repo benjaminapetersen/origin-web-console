@@ -89,6 +89,19 @@
       context = {
         namespace: _.get(ctrl.target, 'metadata.namespace')
       };
+
+      ctrl.preselectSingleBinding();
+
+    };
+
+    ctrl.preselectSingleBinding = function() {
+      // per docs:
+      //   https://docs.angularjs.org/api/ng/input/input%5Bradio%5D
+      // and a fiddle or two or so:
+      //   https://jsfiddle.net/9chd58mk/2/
+      //   https://jsfiddle.net/jralston/czLkf4xu/
+      // hmm...
+      ctrl.selectedBinding = (_.size(ctrl.bindings) === 1) ? _.first(ctrl.bindings) : null;
     };
 
     // TODO: sort bindings by app in overview && eliminate this filter function

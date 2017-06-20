@@ -1,7 +1,10 @@
 <h3 class="mar-top-none">
   Select a binding to delete from <strong>{{ctrl.displayName}}</strong>
 </h3>
-<form name="ctrl.bindingSelection" class="mar-bottom-lg">
+<form
+  name="ctrl.bindingSelection"
+  class="mar-bottom-lg"
+  ng-init="ctrl.preselectSingleBinding()">
   <fieldset ng-disabled="ctrl.isDisabled">
     <div ng-repeat="binding in ctrl.bindings | orderBy: ctrl.firstAppForBindingName" class="radio">
       <label>
