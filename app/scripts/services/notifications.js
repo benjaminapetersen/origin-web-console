@@ -66,6 +66,7 @@ angular
           Service: 0,
           Route: 0,
           HorizontalPodAutoscaler: 0,
+          Binding: 0,
           // Builds
           BuildConfig: 1,
           Build: 1,
@@ -137,6 +138,7 @@ angular
           if(!isImportantEvent(event)) {
             return;
           }
+          console.log('event to push', namespace, index, uid, event.message, event.lastTimestamp, event.metadata);
           cachedProcessedEvents[namespace][index].notifications.push({
             unread:  !_.get(cachedUserActions, [namespace, uid, 'read']),
             message: event.message,
