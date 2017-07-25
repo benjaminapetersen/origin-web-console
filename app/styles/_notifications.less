@@ -11,7 +11,12 @@
 }
 
 notification-drawer-wrapper {
-  z-index: 10;  // the overview shields are set to 9
+  z-index: 1050;  // the overview shields are set to 9
+  pf-notification-drawer {
+    .drawer-pf {
+      z-index: 1050;
+    }
+  }
 }
 
 .drawer-pf-notification:hover {
