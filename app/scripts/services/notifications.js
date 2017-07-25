@@ -5,7 +5,9 @@ angular
   .factory('eventTypeOrganizer',
     function() {
       var cacheKey = 'events:sorted';
-      var storageType = 'localStorage'; // to gather as much as possible!
+      // may not keep them in localStorage permanently, but is useful for now to
+      // gather events over longer periods of time.
+      var storageType = 'localStorage';
       var load = function() {
         return JSON.parse(window[storageType].getItem(cacheKey) || '{}');
       };
@@ -24,7 +26,7 @@ angular
           cachedEvents[kind] = cachedEvents[kind] || {};
           cachedEvents[kind][reason] = cachedEvents[kind][reason] || {};
           cachedEvents[kind][reason][type] = cachedEvents[kind][reason][type] || [];
-          if(!_.contains(cachedEvents[kind][reason][type], msg)) {
+          if(!_.includes(cachedEvents[kind][reason][type], msg)) {
             cachedEvents[kind][reason][type].unshift(msg);
             // no need to keep excessive records...
           }
@@ -107,7 +109,7 @@ angular
       var processEvents = function(data) {
         if(!data) {
           return []; // TODO: fix mo' betta
-        };
+        }
         console.log('process', _.keys(data.by('metadata.name')).length);
         console.log('cache', cachedProcessedEvents);
         _.each(data.by('metadata.name'), function(event) {
@@ -175,11 +177,11 @@ angular
           if(!subscriptions[projName]) {
             subscriptions[projName] = {
               callbacks: [],
-              watch: DataService.watch('events', {namespace: projName}, function(data) {
+              watch: DataService.watch('events', {namespace: projName}, _.debounce(function(data) {
                 _.each(subscriptions[projName].callbacks, function(callback) {
                   callback(processEvents(data));
                 });
-              })
+              }, 50), { skipDigest: true })
             };
           }
           var cbIndex = (subscriptions[projName].callbacks.push(cb) -1);
@@ -219,12 +221,3 @@ angular
         }
       };
     });
-
-
-//
-// link: function() {
-//   notifications.subscribe(function(groupedEvents) {
-//
-//   });
-//   notifications.unsubscribe();
-// }
