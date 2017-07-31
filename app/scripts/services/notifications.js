@@ -14,6 +14,7 @@ angular
       var save = function(data) {
         window[storageType].setItem(cacheKey, JSON.stringify(data));
       };
+      var debounceSave = _.debounce(save, 100);
 
       var cachedEvents = load();
       // pod  (kind)
@@ -21,7 +22,7 @@ angular
       //   - "(Normal) nodejs-mongo-8: Need to kill pod "  (type) name: message
       return {
         sort: function(type, reason, kind, name, message) {
-          var msg = `${name}: ${message}`;
+          var msg =  name + ': ' + message;  //`${name}: ${message}`;
           //var tier1 = `${kind} ${reason}`;
           cachedEvents[kind] = cachedEvents[kind] || {};
           cachedEvents[kind][reason] = cachedEvents[kind][reason] || {};
@@ -39,7 +40,7 @@ angular
           // if(!_.contains(cachedEvents[tier1][type], msg)) {
           //   cachedEvents[tier1][type].push(msg);
           // }
-          save(cachedEvents);
+          debounceSave(cachedEvents);
         }
       };
     })
@@ -55,28 +56,29 @@ angular
         window[storageType].setItem(cachedUserActionsKey, JSON.stringify(data));
       };
       var cachedProcessedEvents = {};
+      // TODO: verify these are correct
+      // this just sorts events by object type
+      var indexes = {
+        // Applications
+        DeploymentConfig: 0,
+        ReplicationController: 0,
+        ReplicaSet: 0,
+        Deployment: 0,
+        StatefulSet: 0,
+        Pod: 0,
+        Service: 0,
+        Route: 0,
+        HorizontalPodAutoscaler: 0,
+        Binding: 0,
+        // Builds
+        BuildConfig: 1,
+        Build: 1,
+        Pipeline: 1,
+        ImageStream: 1,
+        // Storage
+        PersistentVolumeClaim: 2
+      };
       var getTypeIndex = function(type) {
-        // TODO: verify these are correct
-        var indexes = {
-          // Applications
-          DeploymentConfig: 0,
-          ReplicationController: 0,
-          ReplicaSet: 0,
-          Deployment: 0,
-          StatefulSet: 0,
-          Pod: 0,
-          Service: 0,
-          Route: 0,
-          HorizontalPodAutoscaler: 0,
-          Binding: 0,
-          // Builds
-          BuildConfig: 1,
-          Build: 1,
-          Pipeline: 1,
-          ImageStream: 1,
-          // Storage
-          PersistentVolumeClaim: 2
-        };
         var index = indexes[type];
         if(typeof index !== 'number') {
           console.warn('MISSING INDEX:', type, APIService.kindToResource(type));
@@ -85,7 +87,8 @@ angular
         }
         return indexes[type];
       };
-      var isImportantEvent = function(event) {
+      // TODO: this will be used to filter out the events we don't need to care about.
+      var isImportantEvent = function() {
         console.log('isImportantEvent');
         return true;
       };
@@ -114,9 +117,9 @@ angular
         console.log('cache', cachedProcessedEvents);
         _.each(data.by('metadata.name'), function(event) {
           var namespace = event.involvedObject.namespace;
-          var type = event.type;
+          //var type = event.type;
           // TODO: type, reason, kind....
-          var name = event.involvedObject.name;
+          //var name = event.involvedObject.name;
           var uid = event.metadata.uid;
           var kind = event.involvedObject.kind;
           var index = getTypeIndex(kind);
@@ -140,7 +143,7 @@ angular
           if(!isImportantEvent(event)) {
             return;
           }
-          console.log('event to push', namespace, index, uid, event.message, event.lastTimestamp, event.metadata);
+          //console.log('event to push', namespace, index, uid, event.message, event.lastTimestamp, event.metadata);
           cachedProcessedEvents[namespace][index].notifications.push({
             unread:  !_.get(cachedUserActions, [namespace, uid, 'read']),
             message: event.message,

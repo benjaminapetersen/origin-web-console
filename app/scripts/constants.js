@@ -90,7 +90,8 @@ angular.extend(window.OPENSHIFT_CONSTANTS, {
     service_catalog_landing_page: false,
     // Set to `true` when the template service broker is enabled for the cluster in master-config.yaml
     template_service_broker: false,
-    pod_presets: false
+    pod_presets: false,
+    events_in_notification_drawer: false
   },
 
   SAMPLE_PIPELINE_TEMPLATE: {
