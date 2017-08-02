@@ -1,6 +1,10 @@
-<a href="" ng-click="onClick()" class="nav-item-iconic relative">
+<a
+  ng-if="!$ctrl.hide"
+  href=""
+  ng-click="$ctrl.onClick()"
+  class="nav-item-iconic relative">
   <div
-    ng-if="count"
+    ng-if="$ctrl.showNewNotificationIndicator"
     class="notification-counter"
     row main-axis="center" cross-axis="center">
     <span><!--{{countDisplay}}--></span>

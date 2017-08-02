@@ -6,6 +6,7 @@ angular
   .component('notificationDrawerWrapper', {
     templateUrl: 'views/directives/notifications/notification-drawer-wrapper.html',
     controller: [
+      '$filter',
       '$interval',
       '$timeout',
       '$routeParams',
@@ -13,8 +14,9 @@ angular
       'Constants',
       'DataService',
       'NotificationsService',
-      'EventCache',
+      'EventsService',
       function(
+        $filter,
         $interval,
         $timeout,
         $routeParams,
@@ -22,9 +24,10 @@ angular
         Constants,
         DataService,
         NotificationsService,
-        EventCache) {
+        EventsService) {
 
-        var ENABLE_EVENTS = _.get(Constants, 'ENABLE_TECH_PREVIEW_FEATURE.events_in_notification_drawer');
+        // kill switch if watching events is too expensive
+        var ENABLE_EVENT_WATCH = _.get(Constants, 'FEATURE_FLAGS.global_event_watch_for_notification_drawer');
         var drawer = this;
 
         // global event watches
@@ -35,15 +38,16 @@ angular
 
         var eventsWatcher;
         var eventsFromWatch = [];
+        // TODO: build in notification service events.
         var internalNotifications = [];
 
         var notificationGroupsMap = {};
         var notificationGroups = [];
 
-        var addProjectToNotificationGroups = function(projectName) {
+        var addProjectToNotificationGroups = function(projectName, displayName) {
           if(projectName && !notificationGroupsMap[projectName]) {
             notificationGroupsMap[projectName] = {
-              heading: projectName,
+              heading: displayName || projectName,
               notifications: []
             };
           }
@@ -56,7 +60,7 @@ angular
         };
 
         var watchEvents = function(projectName, cb) {
-          if(projectName && ENABLE_EVENTS) {
+          if(projectName && ENABLE_EVENT_WATCH) {
             eventsWatcher = DataService.watch('events', {namespace: projectName}, _.debounce(cb, 50), { skipDigest: true });
           }
         };
@@ -74,29 +78,27 @@ angular
           notificationListener && notificationListener();
         };
 
-        var isImportantEvent = function(event) {
-          return event.type === 'Warning';
-          return true;
-        };
-
         // notificationGroups[projectName]
         var eventWatchCallback = function(eventData) {
           var eventsByName = eventData.by('metadata.name');
-          console.log('events by name', eventsByName);
           // process into the map
           // TODO: Get NotificationService.onNotificationAdded in here.
           _.each(eventsByName, function(event) {
-            if(isImportantEvent(event)) {
+            if(EventsService.isImportantEvent(event)) {
+              console.log(event);
               // TODO: deduplicate events?
               // events in etcd should be deduplicated already, having the count incremented,
               // however, we probably have to further deduplicate them.
               notificationGroupsMap[event.metadata.namespace].notifications.push({
                 // TODO: will need cache to track read/unread
-                unread:  false, // !_.get(cachedUserActions, [namespace, uid, 'read'])
+                unread:  true, // !_.get(cachedUserActions, [namespace, uid, 'read'])
                 message: event.message,
-                timestamp: event.lastTimestamp,
+                lastTimestamp: event.lastTimestamp,
                 metadata: event.metadata,
                 involvedObject: event.involvedObject,
+                name: event.involvedObject.name,
+                kind: event.involvedObject.kind,
+                namespace: event.involvedObject.namespace,
                 status: event.type,
                 reason: event.reason,
                 actions: null
@@ -105,6 +107,7 @@ angular
           });
           // sort map into array
           notificationGroups = _.sortBy(notificationGroupsMap, function(group) {
+            // TODO: better way to handle open/close, this is brittle & will reset ever update
             group.open = false;
             return group.heading;
           });
@@ -117,16 +120,7 @@ angular
 
         var notificationWatchCallback = function(event, notification) {
           internalNotifications.push(notification);
-          console.log('Compare all notifications to the ones cached here');
-          console.log('local cache:', internalNotifications);
-          console.log('service cache', NotificationsService.getNotifications());
-          drawer.notificationGroups = [{
-            heading: 'Notifications 1 for (no proj!)',
-            notifications: internalNotifications
-          }, {
-            heading: 'Notifications 2 for (no proj!)',
-            notifications: NotificationsService.getNotifications()
-          }];
+          // now to process into what actually gets
         };
 
         var deregisterRootScopeWatches = function() {
@@ -182,7 +176,7 @@ angular
               // });
             },
             markRead: function(notification) {
-              console.log('markUnread', notification);
+              notification.unread = false;
               // notifications.markRead(notification);
             },
             getNotficationStatusIconClass: function(notification) {
@@ -192,6 +186,7 @@ angular
         });
 
         var reset = function() {
+          // TODO: need to get the project here to get access to the display name
           addProjectToNotificationGroups($routeParams.project);
           deregisterEventsWatch();
           deregisterNotificationListener();

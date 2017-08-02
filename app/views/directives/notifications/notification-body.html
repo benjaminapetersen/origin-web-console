@@ -30,22 +30,37 @@
       </li>
     </ul>
   </div>
+
   <span
     class="{{'pull-left ' + $ctrl.customScope.getNotficationStatusIconClass(notification)}}"
     ng-click="$ctrl.customScope.markRead(notification)"></span>
   <span
     class="drawer-pf-notification-message"
     ng-click="$ctrl.customScope.markRead(notification)">{{notification.message}}</span>
+  <span class="drawer-pf-notification-info">
+    <a ng-href="{{notification.name | navigateResourceURL : notification.kind : notification.namespace}}">
+      {{notification.name}}
+    </a>
+  </span>
   <div
     class="drawer-pf-notification-info"
     ng-click="$ctrl.customScope.markRead(notification)">
-    <span class="date">{{notification.timeStamp | date:'MM/dd/yyyy'}}</span>
-    <span class="time">{{notification.timeStamp | date:'h:mm:ss a'}}</span>
+    <span class="date">{{notification.lastTimestamp | date:'MM/dd/yyyy'}}</span>
+    <span class="time">{{notification.lastTimestamp | date:'h:mm:ss a'}}</span>
   </div>
+
 </div>
+
+<style>
+  [outline] {
+    outline: 1px dashed #990000;
+  }
+</style>
+
+
 <div ng-if="drawerExpanded" class="container-fluid">
   <div class="row">
-    <div class="col-sm-6">
+    <div class="col-sm-6" outline>
       <span class="pull-left {{$ctrl.customScope.getNotficationStatusIconClass(notification)}}"></span>
       <span
         class="drawer-pf-notification-message notification-message"
@@ -53,13 +68,13 @@
         tooltip-popup-delay="500"
         tooltip-placement="bottom"
         tooltip="{{notification.message}}">
-            {{notification.message}}
+          {{notification.message}}
       </span>
     </div>
-    <div class="col-sm-6">
-      <div class="drawer-pf-notification-info">
-        <span class="date">{{notification.timeStamp | date:'MM/dd/yyyy'}}</span>
-        <span class="time">{{notification.timeStamp | date:'h:mm:ss a'}}</span>
+    <div class="col-sm-6" outline>
+      <div class="drawer-pf-notification-info" outline>
+        <span class="date">{{notification.lastTimestamp | date:'MM/dd/yyyy'}}</span>
+        <span class="time">{{notification.lastTimestamp | date:'h:mm:ss a'}}</span>
       </div>
       <div
         class="dropdown pull-right dropdown-kebab-pf"

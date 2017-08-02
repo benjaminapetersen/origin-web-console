@@ -84,14 +84,17 @@ angular.extend(window.OPENSHIFT_CONSTANTS, {
 
   // This blacklist hides certain kinds from the "Other Resources" page because they are unpersisted, disallowed for most end users, or not supported by openshift but exist in kubernetes
   AVAILABLE_KINDS_BLACKLIST: [],
-
+  // Kill switches for features that are not in tech-preview
+  FEATURE_FLAGS: {
+    // The long running watch on events may be extremely expensive.
+    global_event_watch_for_notification_drawer: true
+  },
   ENABLE_TECH_PREVIEW_FEATURE: {
     // Enable the new landing page and service catalog experience
     service_catalog_landing_page: false,
     // Set to `true` when the template service broker is enabled for the cluster in master-config.yaml
     template_service_broker: false,
-    pod_presets: false,
-    events_in_notification_drawer: false
+    pod_presets: false
   },
 
   SAMPLE_PIPELINE_TEMPLATE: {

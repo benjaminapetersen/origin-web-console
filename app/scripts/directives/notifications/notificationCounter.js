@@ -11,7 +11,7 @@ angular
       'Constants',
       'DataService',
       function($routeParams, $rootScope, Constants, DataService) {
-        var ENABLE_EVENTS = _.get(Constants, 'ENABLE_TECH_PREVIEW_FEATURE.events_in_notification_drawer');
+        var ENABLE_EVENT_WATCH = _.get(Constants, 'FEATURE_FLAGS.global_event_watch_for_notification_drawer');
         var counter = this;
         var drawerHidden = true;
 
@@ -29,7 +29,7 @@ angular
         };
 
         var watchEvents = function(projectName, cb) {
-          if(projectName && ENABLE_EVENTS) {
+          if(projectName && ENABLE_EVENT_WATCH) {
             eventsWatcher = DataService.watch('events', {namespace: projectName}, _.debounce(cb, 50), { skipDigest: true });
           }
         };
@@ -51,9 +51,12 @@ angular
           });
         };
 
+        // TODO: since the current IMPL of the drawer doesn't support a "global"
+        // empty state, need to hide the bell icon entirely if there are no messages
+        // for a project.  Otherwise, you open to get a blank panel.  Thats not ideal.
         var toggleVisibility = function(projectName) {
           if(!projectName) {
-            counter.hideCounter = true;
+            counter.hide = true;
           }
           counter.showNewNotificationIndicator = true;
         };
