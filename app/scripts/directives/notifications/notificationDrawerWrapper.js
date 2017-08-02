@@ -202,6 +202,7 @@ angular
           // - it waits for more object resolution (not a huge deal in this use case)
           // - tracks route data instead of urls (args to callback fn)
           rootScopeWatches.push($rootScope.$on("$routeChangeSuccess", function () {
+            drawer.projectName = $routeParams.project;
             reset();
           }));
 
