@@ -155,7 +155,6 @@ angular
               });
             }
           });
-          console.log('filtered?', filtered);
           return filtered;
         };
 
@@ -183,8 +182,6 @@ angular
             notification.lastTimestamp = new Date();
           }
           eventsFromNotifications.push(notification);
-          // now to process into what actually gets
-          console.log('notificationWatchCallback', notification);
         };
 
         var deregisterRootScopeWatches = function() {
@@ -206,10 +203,10 @@ angular
           ok: 'pficon pficon-ok'
         };
 
+        // there are only 2 statuses, surprisingly
         var statuses = {
           Normal: statusClasses.info,
           Warning: statusClasses.warning
-          // more...
         };
 
         angular.extend(drawer, {
@@ -221,18 +218,12 @@ angular
           onClose: function() {
             drawer.drawerHidden = true;
           },
-          onClearAll: function() {
-            console.log('onClearAll');
-          },
-          toggleShowDrawer: function() {
-            drawer.hideDrawer = !drawer.hideDrawer;
-          },
           notificationGroups: notificationGroups,
           headingInclude: 'views/directives/notifications/heading.html',
           subheadingInclude: 'views/directives/notifications/subheading.html',
           notificationBodyInclude: 'views/directives/notifications/notification-body.html',
           notificationFooterInclude: 'views/directives/notifications/notification-footer.html',
-          // essentially functions to pass to the notification-body
+          //
           customScope: {
             clearAll: function(group) {
               _.each(group.notifications, function(notification) {
@@ -275,7 +266,8 @@ angular
           // $routeChangeSuccess seems more reliable than $locationChangeSuccess:
           // - it fires once on initial load. $locationChangeSuccess does not.
           // - it waits for more object resolution (not a huge deal in this use case)
-          // - tracks route data instead of urls (args to callback fn)
+          // - tracks route data instead of urls (args to callback fn, also not
+          //   necessary for the current use case)
           rootScopeWatches.push($rootScope.$on("$routeChangeSuccess", function () {
             drawer.customScope.projectName = $routeParams.project;
             reset();
