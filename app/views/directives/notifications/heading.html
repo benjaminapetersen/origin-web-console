@@ -4,18 +4,21 @@
       <strong>{{notificationGroup.heading}}</strong>
     </div>
     <div class="col-md-6 text-right small">
-      <a ng-href="project/{{projectName}}/browse/events">All Events</a>
+      <a ng-href="project/{{$ctrl.customScope.projectName}}/browse/events">All Events</a>
     </div>
   </div>
   <div class="row mar-top-md">
     <div class="col-md-6">
-      <em>2 Unread</em>
+      <em>{{$ctrl.customScope.countAllUnread(notificationGroup)}} Unread</em>
     </div>
     <div class="col-md-6 text-right small">
-      <span class="pad-right-md">
-        <span class="pficon pficon-warning-triangle-o" aria-hidden="true"></span> 2
+      <span ng-repeat="(countKey, count) in notificationGroup.counts">
+        <span
+          class="pficon"
+          ng-class="$ctrl.customScope.getStatusForCount(countKey)"
+          aria-hidden="true">
+        </span> {{count}}
       </span>
-      <span class="pficon pficon pficon-info" aria-hidden="true"></span> 4
     </div>
   </div>
 </div>

@@ -1,33 +1,34 @@
-.notification-counter {
-  width: 9px;
-  height: 9px;
-  position: absolute;
-  top: 18px;
-  right: 9px;
-  border-radius: 500px;
-  color: #fff;
-  font-size: 0.7em;
-  background-color: #589AE7;
-}
-
-notification-drawer-wrapper {
-  z-index: 1050;  // the overview shields are set to 9
-  pf-notification-drawer {
-    .drawer-pf {
-      z-index: 1050;
-    }
-  }
-}
-
 .drawer-pf-notification:hover {
   cursor: pointer;
 }
 
-.panel-heading {
-  .small {
-    .small();
-    color: #000000;
+.notification-counter {
+  background-color: #589AE7;
+  border-radius: 500px;
+  color: #fff;
+  font-size: 0.7em;
+  height: 9px;
+}
+
+.notification-counter-offset {
+  position: absolute;
+  right: 9px;
+  top: 18px;
+  width: 9px;
+}
+
+notification-drawer-wrapper {
+  .drawer-pf {
+    height: calc(~"100vh - 80px");//to create a 20px offset bottom
+    top: @navbar-os-header-height-desktop - 10;
+    z-index: @zindex-navbar-fixed + 1; // was 1050
+    .tech-preview & {
+      top: @navbar-os-header-height-desktop + @tech-preview-banner-height - 10;
+    }
   }
+}
+
+.panel-heading {
   .panel-title {
     .container-fluid {
       margin-left: 0;
@@ -35,5 +36,9 @@ notification-drawer-wrapper {
       padding-left: 0;
       padding-right: 0;
     }
+  }
+  .small {
+    .small();
+    color: #000000;
   }
 }
