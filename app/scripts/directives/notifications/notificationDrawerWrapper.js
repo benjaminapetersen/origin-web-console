@@ -38,9 +38,6 @@ angular
         var notificationListener;
 
         var eventsWatcher;
-        // TODO: decide if we cache these or no
-        var eventsFromWatch = [];
-        // TODO: decide if we cache these or no
         var eventsFromNotifications = [];
 
         // TODO:
@@ -96,7 +93,7 @@ angular
           return _.filter(notifications, 'unread');
         };
 
-        // returns a count for each type of notification:
+        // returns a count for each type of notification, example:
         // {Normal: 1, Warning: 5}
         var countUnreadNotificationsForGroup = function(group) {
           return _.countBy(unread(group.notifications), function(notification) {
@@ -159,7 +156,6 @@ angular
           return filtered;
         };
 
-        // notificationGroups[projectName]
         var eventWatchCallback = function(eventData) {
           var eventsByName = eventData.by('metadata.name');
 
@@ -167,18 +163,20 @@ angular
           notificationGroups = sortNotificationGroups(notificationGroupsMap);
 
           $rootScope.$apply(function () {
-            // if we go back to multiple projects, we can eliminate the filter here
-            // and just pass the whole array.
+            // NOTE: we are currently only showing one project in the drawer at a
+            // time. If we go back to multiple projects, we can eliminate the filter here
+            // and just pass the whole array as notificationGroups.
             // if we do, we will have to handle group.open to keep track of what the
-            // user is viewing at the time.
+            // user is viewing at the time & indicate to the user that the non-active
+            // project is "asleep"/not being watched.
             drawer.notificationGroups = _.filter(notificationGroups, function(group) {
               return group.project.metadata.name === $routeParams.project;
             });
           });
         };
 
+        // TODO: atm these are not being added to the notificationGroups
         var notificationWatchCallback = function(event, notification) {
-          // TODO: decide how to work these in....
           if(!notification.lastTimestamp) {
             notification.lastTimestamp = new Date();
           }
@@ -204,7 +202,6 @@ angular
           ok: 'pficon pficon-ok'
         };
 
-        // there are only 2 statuses, surprisingly
         var statuses = {
           Normal: statusClasses.info,
           Warning: statusClasses.warning
@@ -274,7 +271,7 @@ angular
             reset();
           }));
 
-          // event from other nodes (counter) to signal the drawer to open/close
+          // event from the counter to signal the drawer to open/close
           rootScopeWatches.push($rootScope.$on('notification-drawer:show', function(evt, data) {
             drawer.drawerHidden = data.drawerHidden;
           }));
