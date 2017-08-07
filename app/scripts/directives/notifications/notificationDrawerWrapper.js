@@ -43,6 +43,9 @@ angular
         // TODO: decide if we cache these or no
         var eventsFromNotifications = [];
 
+        // TODO:
+        // include both Notifications & Events,
+        // rather than destroying the map each time maintain it & add new items
         var notificationGroupsMap = {};
         var notificationGroups = [];
 
@@ -126,7 +129,6 @@ angular
             return group.heading;
           });
           // and sort the notifications under each one
-          // TODO: perhaps there is a more efficient way to do this
           _.each(sortedGroups, function(group) {
             group.notifications = sortNotifications(group.notifications);
             group.counts = countUnreadNotificationsForGroup(group);
@@ -140,8 +142,7 @@ angular
             if(EventsService.isImportantEvent(event)) {
               ensureProjectGroupExists(filtered, event.metadata.namespace);
               filtered[event.metadata.namespace].notifications.push({
-                // TODO: will need cache to track read/unread
-                unread:  !EventsService.isRead(event), // !_.get(cachedUserActions, [namespace, uid, 'read'])
+                unread:  !EventsService.isRead(event),
                 message: event.message,
                 lastTimestamp: event.lastTimestamp,
                 metadata: event.metadata,
