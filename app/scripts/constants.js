@@ -143,6 +143,47 @@ angular.extend(window.OPENSHIFT_CONSTANTS, {
     {resource: 'services', group: ''},
     {resource: 'statefulsets', group: 'apps'}
   ],
+  // TODO:
+  // This map can drive both the drawer & toast messages by
+  // updating it to the following format:
+  // { drawer: true, toast: true  }
+  // TODO: Also consider an API_OBJECTS_TO_IGNORE
+  // map that can blacklist some, for example, if FailedCreate
+  // applies to many but we don't want to see all.
+  EVENTS_TO_SHOW: {
+    // CRUD events that apply to more than one api object
+    FailedCreate: true,
+    FailedDelete: true,
+    FailedUpdate: true,
+    // Build
+    BuildStarted: true,
+    BuildCompleted: true,
+    BuildFailed: true,
+    BuildCancelled: true,
+    // BuildConfig
+    //
+    // Deployment
+    Failed: true,
+    ScalingReplicaSet: true,
+    DeploymentCancelled: true,
+    // DeploymentConfig
+    DeploymentCreated: true,
+    DeploymentCreationFailed: true,
+    // Pod
+    FailedSync: true,
+    // SuccessfulDelete: true,
+    // Cron
+    //
+    // PodAutoscaler
+    SuccessfulRescale: true,
+    FailedRescale: true,
+    // Service
+    LoadBalancerUpdateFailed: true,
+    // PVC
+    VolumeDeleted: true,
+    FailedBinding: true,
+    ProvisioningFailed: true
+  },
 
   // href's will be prefixed with /project/{{projectName}} unless they are absolute URLs
   PROJECT_NAVIGATION: [
