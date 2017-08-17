@@ -7,15 +7,15 @@ const projectHelpers = require('../helpers/project.js');
 let goToAddToProjectPage = (projectName) => {
   let uri = 'project/' + projectName + '/create';
   h.goToPage(uri);
-  expect(element(by.cssContainingText('h1', "Create Using Your Code")).isPresent()).toBe(true);
-  expect(element(by.cssContainingText('h1', "Create Using a Template")).isPresent()).toBe(true);
+  expect(element(by.cssContainingText('#container-main h1', "Create Using Your Code")).isPresent()).toBe(true);
+  expect(element(by.cssContainingText('#container-main h1', "Create Using a Template")).isPresent()).toBe(true);
   expect(element(by.model('from_source_url')).isPresent()).toBe(true);
   expect(element(by.cssContainingText('.catalog h3 > a', "ruby-helloworld-sample")).isPresent()).toBe(true);
 };
 
 let goToCreateProjectPage = () => {
   h.goToPage('create-project');
-  expect(element(by.cssContainingText('h1', "Create Project")).isPresent()).toBe(true);
+  expect(element(by.cssContainingText('#container-main h1', "Create Project")).isPresent()).toBe(true);
   expect(element(by.model('name')).isPresent()).toBe(true);
   expect(element(by.model('displayName')).isPresent()).toBe(true);
   expect(element(by.model('description')).isPresent()).toBe(true);
@@ -41,7 +41,7 @@ let requestCreateFromTemplate = (projectName, templateName) => {
 let attachBuilderImageToSource = (projectName, builderImageName) => {
   let uri = 'project/' + projectName + '/catalog/images';
   h.waitForUri(uri);
-  expect(element(by.cssContainingText('h1', "Select a builder image")).isPresent()).toBe(true);
+  expect(element(by.cssContainingText('#container-main h1', "Select a builder image")).isPresent()).toBe(true);
   let builderImageLink = element(by.cssContainingText('h3 > a', builderImageName));
   expect(builderImageLink.isPresent()).toBe(true);
   builderImageLink.click();
