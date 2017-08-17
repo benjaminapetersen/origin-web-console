@@ -245,7 +245,7 @@
             EventsService.markRead(notification.event);
           });
           render();
-          $rootScope.$emit('notification-drawer:mark-read');
+          $rootScope.$emit('notification-drawer:mark-all-read');
         },
         onClearAll: function(group) {
           _.each(group.notifications, function(notification) {
@@ -254,7 +254,7 @@
           });
           group.notifications = [];
           render();
-          $rootScope.$emit('notification-drawer:mark-read');
+          $rootScope.$emit('notification-drawer:mark-all-read');
         },
         notificationGroups: notificationGroups,
         headingInclude: 'views/directives/notifications/header.html',

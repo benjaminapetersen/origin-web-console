@@ -92,7 +92,7 @@
           }
         }));
 
-        rootScopeWatches.push($rootScope.$on('notification-drawer:mark-read', function() {
+        rootScopeWatches.push($rootScope.$on('notification-drawer:mark-all-read', function() {
           counter.showNewNotificationIndicator = false;
         }));
       };
