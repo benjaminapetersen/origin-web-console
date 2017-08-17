@@ -132,7 +132,7 @@
           group.totalUnread = unread(group.notifications).length;
 
           group.hasUnread = !!group.totalUnread;
-          $rootScope.$emit('notification-drawer:count', group.totalUnread);
+          $rootScope.$emit('NotificationDrawerWrapper.count', group.totalUnread);
         });
       };
 
@@ -245,7 +245,7 @@
             EventsService.markRead(notification.event);
           });
           render();
-          $rootScope.$emit('notification-drawer:mark-all-read');
+          $rootScope.$emit('NotificationDrawerWrapper.onMarkAllRead');
         },
         onClearAll: function(group) {
           _.each(group.notifications, function(notification) {
@@ -254,7 +254,7 @@
           });
           group.notifications = [];
           render();
-          $rootScope.$emit('notification-drawer:mark-all-read');
+          $rootScope.$emit('NotificationDrawerWrapper.onMarkAllRead');
         },
         notificationGroups: notificationGroups,
         headingInclude: 'views/directives/notifications/header.html',
@@ -316,7 +316,7 @@
         }));
 
         // event from the counter to signal the drawer to open/close
-        rootScopeWatches.push($rootScope.$on('notification-drawer:toggle', function() {
+        rootScopeWatches.push($rootScope.$on('NotificationDrawerWrapper.toggle', function() {
           drawer.drawerHidden = !drawer.drawerHidden;
         }));
       };

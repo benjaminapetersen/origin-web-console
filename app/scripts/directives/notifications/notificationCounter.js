@@ -32,7 +32,7 @@
         if(!projectName) {
           return;
         }
-        notificationListeners.push($rootScope.$on('notification-drawer:count', cb));
+        notificationListeners.push($rootScope.$on('NotificationDrawerWrapper.count', cb));
       };
 
       var deregisterNotificationListeners = function() {
@@ -58,7 +58,7 @@
       };
 
       counter.onClick = function() {
-        $rootScope.$emit('notification-drawer:toggle');
+        $rootScope.$emit('NotificationDrawerWrapper.toggle');
       };
 
       var drawerCountCallback = function(event, newCount) {
@@ -92,7 +92,7 @@
           }
         }));
 
-        rootScopeWatches.push($rootScope.$on('notification-drawer:mark-all-read', function() {
+        rootScopeWatches.push($rootScope.$on('NotificationDrawerWrapper.onMarkAllRead', function() {
           counter.showNewNotificationIndicator = false;
         }));
       };
