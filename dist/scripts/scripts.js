@@ -3,7 +3,7 @@
 function OverviewController(e, t, n, a, r, o, i, s, c, l, u, d, m, p, g, f, h, v, y, b, C, S, w, k, j) {
 var P = this, R = t("isIE")() || t("isEdge")();
 e.projectName = n.project;
-var E, T, I = t("annotation"), N = t("buildConfigForBuild"), D = t("deploymentIsInProgress"), A = t("imageObjectRef"), B = t("isJenkinsPipelineStrategy"), L = t("isNewerResource"), U = t("label"), O = t("podTemplate"), x = {}, F = {}, M = {}, V = P.state = {
+var E, T, N = t("annotation"), I = t("buildConfigForBuild"), D = t("deploymentIsInProgress"), A = t("imageObjectRef"), B = t("isJenkinsPipelineStrategy"), L = t("isNewerResource"), U = t("label"), O = t("podTemplate"), x = {}, F = {}, M = {}, V = P.state = {
 alerts: {},
 builds: {},
 clusterQuotas: {},
@@ -205,13 +205,13 @@ _.isEmpty(e) || (f.addLabelSuggestionsFromResources(e, x), "pipeline" !== P.view
 }, ke = function(e) {
 _.isEmpty(e) || (f.addLabelSuggestionsFromResources(e, F), "pipeline" === P.viewBy && f.setLabelSuggestions(F));
 }, je = function(e) {
-return "Succeeded" !== e.status.phase && "Failed" !== e.status.phase && (!U(e, "openshift.io/deployer-pod-for.name") && (!I(e, "openshift.io/build.name") && "slave" !== U(e, "jenkins")));
+return "Succeeded" !== e.status.phase && "Failed" !== e.status.phase && (!U(e, "openshift.io/deployer-pod-for.name") && (!N(e, "openshift.io/build.name") && "slave" !== U(e, "jenkins")));
 }, Pe = function() {
 V.podsByOwnerUID = C.groupByOwnerUID(P.pods), P.monopods = _.filter(V.podsByOwnerUID[""], je);
 }, Re = function(e) {
-return !!_.get(e, "status.replicas") || (!I(e, "deploymentConfig") || D(e));
+return !!_.get(e, "status.replicas") || (!N(e, "deploymentConfig") || D(e));
 }, Ee = function(e) {
-return I(e, "deploymentConfig");
+return N(e, "deploymentConfig");
 }, Te = function() {
 if (P.deploymentConfigs && P.replicationControllers) {
 var e = [];
@@ -223,7 +223,7 @@ var r = Ee(a) || "";
 var o = M[r];
 o && !L(a, o) || (M[r] = a);
 var i;
-"Complete" === I(a, "deploymentStatus") && ((i = t[r]) && !L(a, i) || (t[r] = a)), Re(a) && _.set(n, [ r, a.metadata.name ], a);
+"Complete" === N(a, "deploymentStatus") && ((i = t[r]) && !L(a, i) || (t[r] = a)), Re(a) && _.set(n, [ r, a.metadata.name ], a);
 }), _.each(t, function(e, t) {
 _.set(n, [ t, e.metadata.name ], e);
 }), _.each(n, function(e, t) {
@@ -231,15 +231,15 @@ var n = u.sortByDeploymentVersion(e, !0);
 P.replicationControllersByDeploymentConfig[t] = n, P.currentByDeploymentConfig[t] = _.head(n);
 }), P.vanillaReplicationControllers = _.sortBy(e, "metadata.name"), ve();
 }
-}, Ie = function(e, t) {
+}, Ne = function(e, t) {
 if (_.get(e, "status.replicas")) return !0;
 var n = u.getRevision(e);
 return !n || !!t && u.getRevision(t) === n;
-}, Ne = function() {
+}, Ie = function() {
 P.replicaSets && E && (P.replicaSetsByDeploymentUID = b.groupByControllerUID(P.replicaSets), P.currentByDeploymentUID = {}, _.each(P.replicaSetsByDeploymentUID, function(e, t) {
 if (t) {
 var n = E[t], a = _.filter(e, function(e) {
-return Ie(e, n);
+return Ne(e, n);
 }), r = u.sortByRevision(a);
 P.replicaSetsByDeploymentUID[t] = r, P.currentByDeploymentUID[t] = _.head(r);
 }
@@ -265,7 +265,7 @@ V.routesByService = _.mapValues(e, j.sortRoutesByScore), Y();
 }, Le = function() {
 V.hpaByResource = d.groupHPAs(P.horizontalPodAutoscalers);
 }, Ue = function(e) {
-var t = N(e), n = P.buildConfigs[t];
+var t = I(e), n = P.buildConfigs[t];
 if (n) {
 P.recentPipelinesByBuildConfig[t] = P.recentPipelinesByBuildConfig[t] || [], P.recentPipelinesByBuildConfig[t].push(e);
 var a = i.usesDeploymentConfigs(n);
@@ -320,7 +320,7 @@ if (V.builds && P.buildConfigs) {
 P.recentPipelinesByBuildConfig = {}, V.recentBuildsByBuildConfig = {}, V.recentPipelinesByDeploymentConfig = {};
 var e = {};
 _.each(i.interestingBuilds(V.builds), function(t) {
-var n = N(t);
+var n = I(t);
 B(t) ? Ue(t) : (e[n] = e[n] || [], e[n].push(t));
 }), P.recentPipelinesByBuildConfig = _.mapValues(P.recentPipelinesByBuildConfig, function(e) {
 return i.sortBuilds(e, !0);
@@ -388,12 +388,12 @@ P.deploymentConfigs = e.by("metadata.name"), Te(), $e(P.deploymentConfigs), $e(P
 group: "extensions",
 resource: "replicasets"
 }, a, function(e) {
-P.replicaSets = e.by("metadata.name"), Ne(), $e(P.vanillaReplicaSets), $e(P.monopods), pe(P.vanillaReplicaSets), we(P.vanillaReplicaSets), Qe(), ie(), h.log("replicasets (subscribe)", P.replicaSets);
+P.replicaSets = e.by("metadata.name"), Ie(), $e(P.vanillaReplicaSets), $e(P.monopods), pe(P.vanillaReplicaSets), we(P.vanillaReplicaSets), Qe(), ie(), h.log("replicasets (subscribe)", P.replicaSets);
 })), Ye.push(l.watch({
 group: "apps",
 resource: "deployments"
 }, a, function(e) {
-E = e.by("metadata.uid"), P.deployments = _.sortBy(E, "metadata.name"), Ne(), $e(P.deployments), $e(P.vanillaReplicaSets), we(P.deployments), Qe(), ie(), h.log("deployments (subscribe)", P.deploymentsByUID);
+E = e.by("metadata.uid"), P.deployments = _.sortBy(E, "metadata.name"), Ie(), $e(P.deployments), $e(P.vanillaReplicaSets), we(P.deployments), Qe(), ie(), h.log("deployments (subscribe)", P.deploymentsByUID);
 })), Ye.push(l.watch("builds", a, function(e) {
 V.builds = e.by("metadata.name"), Ge(), h.log("builds (subscribe)", V.builds);
 })), Ye.push(l.watch({
@@ -1252,7 +1252,20 @@ return $(this).data("time-only") ? t(r, null) || a : e(r, null, o, i) || a;
 e && $("body").addClass("ios");
 } ]).run([ "$rootScope", function(e) {
 _.get(window, "OPENSHIFT_CONSTANTS.ENABLE_TECH_PREVIEW_FEATURE.service_catalog_landing_page") && (e.globalTechPreviewIndicator = !0, $("body").addClass("tech-preview"));
-} ]), hawtioPluginLoader.addModule("openshiftConsole"), angular.module("openshiftConsole").factory("APIDiscovery", [ "LOGGING_URL", "METRICS_URL", "$q", function(e, t, n) {
+} ]), hawtioPluginLoader.addModule("openshiftConsole"), angular.module("openshiftConsole").factory("BrowserStore", [ function() {
+var e = {
+local: window.localStorage,
+session: window.sessionStorage
+};
+return {
+saveJSON: function(t, n, a) {
+return e[t].setItem("openshift/" + n, JSON.stringify(a));
+},
+loadJSON: function(t, n) {
+return JSON.parse(e[t].getItem("openshift/" + n) || "{}");
+}
+};
+} ]), angular.module("openshiftConsole").factory("APIDiscovery", [ "LOGGING_URL", "METRICS_URL", "$q", function(e, t, n) {
 return {
 getLoggingURL: function() {
 return n.when(e);
@@ -4257,32 +4270,24 @@ y();
 }), v && e.$on("$locationChangeStart", function(t) {
 g.search().startTour && (e.startGuidedTour(), t.preventDefault());
 });
-} ]), angular.module("openshiftConsole").factory("EventsService", [ function() {
-function e(e, t) {
-this.type = e, this.key = t;
-}
-e.prototype.loadJSON = function() {
-return JSON.parse(window[this.type].getItem("openshift/" + this.key) || "{}");
-}, e.prototype.saveJSON = function(e) {
-window[this.type].setItem("openshift/" + this.key, JSON.stringify(e));
-};
-var t = new e("sessionStorage", "events"), n = t.loadJSON() || {}, a = _.get(window, "OPENSHIFT_CONSTANTS.EVENTS_TO_SHOW");
+} ]), angular.module("openshiftConsole").factory("EventsService", [ "BrowserStore", function(e) {
+var t = e.loadJSON("session", "events") || {}, n = _.get(window, "OPENSHIFT_CONSTANTS.EVENTS_TO_SHOW");
 return {
 isImportantEvent: function(e) {
 var t = e.reason;
-return a[t];
+return n[t];
 },
-markRead: function(e) {
-_.set(n, [ e.metadata.uid, "read" ], !0), t.saveJSON(n);
+markRead: function(n) {
+_.set(t, [ n.metadata.uid, "read" ], !0), e.saveJSON("session", "events", t);
 },
 isRead: function(e) {
-return _.get(n, [ e.metadata.uid, "read" ]);
+return _.get(t, [ e.metadata.uid, "read" ]);
 },
-markCleared: function(e) {
-_.set(n, [ e.metadata.uid, "cleared" ], !0), t.saveJSON(n);
+markCleared: function(n) {
+_.set(t, [ n.metadata.uid, "cleared" ], !0), e.saveJSON("session", "events", t);
 },
 isCleared: function(e) {
-return _.get(n, [ e.metadata.uid, "cleared" ]);
+return _.get(t, [ e.metadata.uid, "cleared" ]);
 }
 };
 } ]), angular.module("openshiftConsole").controller("ProjectsController", [ "$scope", "$filter", "$location", "$route", "$timeout", "AuthService", "DataService", "KeywordService", "Logger", "ProjectsService", function(e, t, n, a, r, o, i, s, c, l) {
@@ -4695,12 +4700,12 @@ n.filteredStatefulSets = s.filterForKeywords(_.values(n.statefulSets), S, w);
 b = _.filter(n.pods, function(e) {
 return !n.filters.hideOlderResources || "Succeeded" !== e.status.phase && "Failed" !== e.status.phase;
 }), n.filteredPods = s.filterForKeywords(b, S, w);
-}, I = a("isIncompleteBuild"), N = a("buildConfigForBuild"), D = a("isRecentBuild"), A = function() {
+}, N = a("isIncompleteBuild"), I = a("buildConfigForBuild"), D = a("isRecentBuild"), A = function() {
 moment().subtract(5, "m");
 h = _.filter(n.builds, function(e) {
 if (!n.filters.hideOlderResources) return !0;
-if (I(e)) return !0;
-var t = N(e);
+if (N(e)) return !0;
+var t = I(e);
 return t ? n.latestBuildByConfig[t].metadata.name === e.metadata.name : D(e);
 }), n.filteredBuilds = s.filterForKeywords(h, S, w);
 }, B = a("deploymentStatus"), L = a("deploymentIsInProgress"), U = function() {
@@ -4912,7 +4917,7 @@ return e ? a + (v(e, "description") || "") : "";
 }
 }
 });
-var I = function(e, t, n, r) {
+var N = function(e, t, n, r) {
 var o = {
 alerts: {},
 detailsMarkup: C.remove.areYouSure.html.subject({
@@ -4958,7 +4963,7 @@ project: n,
 subjectKinds: T,
 canUpdateRolebindings: y("rolebindings", "update", f),
 confirmRemove: function(n, r, i) {
-var c = null, l = I(n, r, i, a.user.metadata.name);
+var c = null, l = N(n, r, i, a.user.metadata.name);
 _.isEqual(n, a.user.metadata.name) && u.isLastRole(a.user.metadata.name, a.roleBindings) && (c = !0), o.open({
 animation: !0,
 templateUrl: "views/modals/confirm.html",
@@ -5725,14 +5730,14 @@ e.autoscalers = e.hpaForRS.concat(t);
 var a = s.filterHPA(v, "Deployment", e.deployment.metadata.name);
 e.autoscalers = e.hpaForRS.concat(a);
 } else e.autoscalers = e.hpaForRS;
-}, I = function() {
+}, N = function() {
 j.push(o.watch(e.resource, f, function(t) {
 var n, a = [];
 angular.forEach(t.by("metadata.name"), function(t) {
 (C(t, "deploymentConfig") || "") === e.deploymentConfigName && a.push(t);
 }), n = i.getActiveDeployment(a), e.isActive = n && n.metadata.uid === e.replicaSet.metadata.uid, T();
 }));
-}, N = function() {
+}, I = function() {
 s.getHPAWarnings(e.replicaSet, e.autoscalers, e.limitRanges, u).then(function(t) {
 e.hpaWarnings = t;
 });
@@ -5814,14 +5819,14 @@ break;
 case "ReplicaSet":
 L();
 }
-N(), e.breadcrumbs = r.getBreadcrumbs({
+I(), e.breadcrumbs = r.getBreadcrumbs({
 object: t
 }), j.push(o.watchObject(e.resource, n.replicaSet, f, function(t, n) {
 "DELETED" === n && (e.alerts.deleted = {
 type: "warning",
 message: "This " + S + " has been deleted."
-}), e.replicaSet = t, R(t), N(), U(), e.deployment && $();
-})), e.deploymentConfigName && I(), j.push(o.watch("pods", f, function(t) {
+}), e.replicaSet = t, R(t), I(), U(), e.deployment && $();
+})), e.deploymentConfigName && N(), j.push(o.watch("pods", f, function(t) {
 var n = t.by("metadata.name");
 e.podsForDeployment = g.filterForOwner(n, e.replicaSet);
 }));
@@ -5851,12 +5856,12 @@ group: "autoscaling",
 resource: "horizontalpodautoscalers",
 version: "v1"
 }, f, function(e) {
-v = e.by("metadata.name"), T(), N();
+v = e.by("metadata.name"), T(), I();
 }, {
 poll: E,
 pollInterval: 6e4
 })), o.list("limitranges", f).then(function(t) {
-e.limitRanges = t.by("metadata.name"), N();
+e.limitRanges = t.by("metadata.name"), I();
 });
 j.push(o.watch("resourcequotas", f, function(t) {
 e.quotas = t.by("metadata.name");
@@ -7553,8 +7558,8 @@ title: R
 var E = {
 name: "app",
 value: ""
-}, T = t("orderByDisplayName"), I = t("getErrorDetails"), N = {}, D = function() {
-f.hideNotification("create-builder-list-config-maps-error"), f.hideNotification("create-builder-list-secrets-error"), _.each(N, function(e) {
+}, T = t("orderByDisplayName"), N = t("getErrorDetails"), I = {}, D = function() {
+f.hideNotification("create-builder-list-config-maps-error"), f.hideNotification("create-builder-list-secrets-error"), _.each(I, function(e) {
 !e.id || "error" !== e.type && "warning" !== e.type || f.hideNotification(e.id);
 });
 };
@@ -7624,7 +7629,7 @@ a = T(t.by("metadata.name")), e.valueFromObjects = a.concat(o);
 id: "create-builder-list-config-maps-error",
 type: "error",
 message: "Could not load config maps.",
-details: I(e)
+details: N(e)
 });
 }), c.list("secrets", i, null, {
 errorNotification: !1
@@ -7641,7 +7646,7 @@ e.unshift("");
 id: "create-builder-list-secrets-error",
 type: "error",
 message: "Could not load secrets.",
-details: I(e)
+details: N(e)
 });
 }), c.get("imagestreams", t.imageName, {
 namespace: t.namespace || r.project
@@ -7718,11 +7723,11 @@ cancelButtonText: "Cancel"
 }
 }).result.then(B);
 }, U = function(t) {
-D(), N = t.quotaAlerts || [], e.nameTaken || _.some(N, {
+D(), I = t.quotaAlerts || [], e.nameTaken || _.some(I, {
 type: "error"
-}) ? (e.disableInputs = !1, _.each(N, function(e) {
+}) ? (e.disableInputs = !1, _.each(I, function(e) {
 e.id = _.uniqueId("create-builder-alert-"), f.addNotification(e);
-})) : _.isEmpty(N) ? B() : (L(N), e.disableInputs = !1);
+})) : _.isEmpty(I) ? B() : (L(I), e.disableInputs = !1);
 };
 e.projectDisplayName = function() {
 return k(this.project) || this.projectName;
@@ -9094,7 +9099,7 @@ scope: p
 }).result.then(function() {
 l.getLatestQuotaAlerts(p.createResources, {
 namespace: p.input.selectedProject.metadata.name
-}).then(N);
+}).then(I);
 });
 }
 function y() {
@@ -9106,7 +9111,7 @@ t > 0 && a.push(k()), e > 0 && a.push(w()), n.all(a).then(b);
 }
 function b() {
 var e, n;
-I(), "Template" === p.resourceKind && p.templateOptions.process && !p.errorOccurred ? p.isDialog ? p.$emit("fileImportedFromYAMLOrJSON", {
+N(), "Template" === p.resourceKind && p.templateOptions.process && !p.errorOccurred ? p.isDialog ? p.$emit("fileImportedFromYAMLOrJSON", {
 project: p.input.selectedProject,
 template: p.resource
 }) : (n = p.templateOptions.add || p.updateResources.length > 0 ? p.input.selectedProject.metadata.name : "", e = s.createFromTemplateURL(p.resource, p.input.selectedProject.metadata.name, {
@@ -9272,12 +9277,12 @@ cancelButtonText: "Cancel"
 }
 }
 }).result.then(y);
-}, T = {}, I = function() {
+}, T = {}, N = function() {
 c.hideNotification("from-file-error"), _.each(T, function(e) {
 !e.id || "error" !== e.type && "warning" !== e.type || c.hideNotification(e.id);
 });
-}, N = function(e) {
-I(), T = u.getSecurityAlerts(p.createResources, p.input.selectedProject.metadata.name);
+}, I = function(e) {
+N(), T = u.getSecurityAlerts(p.createResources, p.input.selectedProject.metadata.name);
 var t = e.quotaAlerts || [];
 T = T.concat(t), _.filter(T, {
 type: "error"
@@ -9303,7 +9308,7 @@ e.push(C(t));
 p.input.selectedProject = t, n.all(e).then(function() {
 p.errorOccurred || (1 === p.createResources.length && "Template" === p.resourceList[0].kind ? h() : _.isEmpty(p.updateResources) ? l.getLatestQuotaAlerts(p.createResources, {
 namespace: p.input.selectedProject.metadata.name
-}).then(N) : (p.updateTemplate = 1 === p.updateResources.length && "Template" === p.updateResources[0].kind, p.updateTemplate ? h() : v()));
+}).then(I) : (p.updateTemplate = 1 === p.updateResources.length && "Template" === p.updateResources[0].kind, p.updateTemplate ? h() : v()));
 });
 }, function(e) {
 c.addNotification({
@@ -9315,10 +9320,10 @@ details: R(e)
 });
 }
 }, p.cancel = function() {
-I(), s.toProjectOverview(p.input.selectedProject.metadata.name);
+N(), s.toProjectOverview(p.input.selectedProject.metadata.name);
 };
 var $ = e("displayName");
-p.$on("importFileFromYAMLOrJSON", p.create), p.$on("$destroy", I);
+p.$on("importFileFromYAMLOrJSON", p.create), p.$on("$destroy", N);
 } ]
 };
 } ]), angular.module("openshiftConsole").directive("oscFileInput", [ "Logger", function(e) {
@@ -10735,12 +10740,12 @@ if (!m.pod) return null;
 var t = m.options.selectedContainer;
 switch (e) {
 case "memory/usage":
-var n = I(t);
+var n = N(t);
 if (n) return s.bytesToMiB(d(n));
 break;
 
 case "cpu/usage_rate":
-var a = N(t);
+var a = I(t);
 if (a) return d(a);
 }
 return null;
@@ -10861,7 +10866,7 @@ m.loaded = !0;
 }
 }
 m.includedMetrics = m.includedMetrics || [ "cpu", "memory", "network" ];
-var R, E = {}, T = {}, I = n("resources.limits.memory"), N = n("resources.limits.cpu"), D = 30, $ = !1;
+var R, E = {}, T = {}, N = n("resources.limits.memory"), I = n("resources.limits.cpu"), D = 30, $ = !1;
 m.uniqueID = c.uniqueID(), m.metrics = [], _.includes(m.includedMetrics, "memory") && m.metrics.push({
 label: "Memory",
 units: "MiB",
@@ -11025,9 +11030,9 @@ return e[0];
 }), i);
 }
 function u(e) {
-k || (N = 0, t.showAverage = _.size(t.pods) > 5 || w, _.each(t.metrics, function(n) {
+k || (I = 0, t.showAverage = _.size(t.pods) > 5 || w, _.each(t.metrics, function(n) {
 var a, r = o(e, n), i = n.descriptor;
-w && n.compactCombineWith && (i = n.compactCombineWith, n.lastValue && (I[i].lastValue = (I[i].lastValue || 0) + n.lastValue)), C[i] ? (C[i].load(r), t.showAverage ? C[i].legend.hide() : C[i].legend.show()) : ((a = D(n)).data = r, C[i] = c3.generate(a));
+w && n.compactCombineWith && (i = n.compactCombineWith, n.lastValue && (N[i].lastValue = (N[i].lastValue || 0) + n.lastValue)), C[i] ? (C[i].load(r), t.showAverage ? C[i].legend.hide() : C[i].legend.show()) : ((a = D(n)).data = r, C[i] = c3.generate(a));
 }));
 }
 function d() {
@@ -11051,10 +11056,10 @@ return w || (n.containerName = t.options.selectedContainer.name), n.start = j ||
 }
 }
 function f(e) {
-if (!k) if (N++, t.noData) t.metricsError = {
+if (!k) if (I++, t.noData) t.metricsError = {
 status: _.get(e, "status", 0),
 details: _.get(e, "data.errorMsg") || _.get(e, "statusText") || "Status code " + _.get(e, "status", 0)
-}; else if (!(N < 2) && t.alerts) {
+}; else if (!(I < 2) && t.alerts) {
 var n = "metrics-failed-" + t.uniqueID;
 t.alerts[n] = {
 type: "error",
@@ -11063,14 +11068,14 @@ links: [ {
 href: "",
 label: "Retry",
 onClick: function() {
-delete t.alerts[n], N = 1, y();
+delete t.alerts[n], I = 1, y();
 }
 } ]
 };
 }
 }
 function h() {
-return _.isEmpty(t.pods) ? (t.loaded = !0, !1) : !t.metricsError && N < 2;
+return _.isEmpty(t.pods) ? (t.loaded = !0, !1) : !t.metricsError && I < 2;
 }
 function v(e, n, a) {
 t.noData = !1;
@@ -11147,11 +11152,11 @@ compactDatasetLabel: "Received",
 compactType: "spline",
 chartID: "network-rx-" + t.uniqueID
 } ];
-var I = _.keyBy(t.metrics, "descriptor");
+var N = _.keyBy(t.metrics, "descriptor");
 t.loaded = !1, t.noData = !0, t.showComputeUnitsHelp = function() {
 l.showComputeUnitsHelp();
 };
-var N = 0;
+var I = 0;
 c.getMetricsURL().then(function(e) {
 t.metricsURL = e;
 }), t.options = {
@@ -11231,7 +11236,7 @@ top: t.followAffixTop || 0
 }));
 }, T = function() {
 return $("#" + t.logViewerID + " .log-view-output");
-}, I = function(e) {
+}, N = function(e) {
 var n = T(), a = n.offset().top;
 if (!(a < 0)) {
 var r = $(".ellipsis-pulser").outerHeight(!0), o = t.fixedHeight ? t.fixedHeight : Math.floor($(window).height() - a - r);
@@ -11239,7 +11244,7 @@ t.chromeless || t.fixedHeight || (o -= 40), e ? n.animate({
 "min-height": o + "px"
 }, "fast") : n.css("min-height", o + "px"), t.fixedHeight && n.css("max-height", o);
 }
-}, N = function() {
+}, I = function() {
 if (!S) {
 var e = function() {
 clearInterval(S), S = null, t.$evalAsync(function() {
@@ -11247,11 +11252,11 @@ t.sized = !0;
 });
 }, n = 0;
 S = setInterval(function() {
-n > 10 ? e() : (n++, T().is(":visible") && (I(), e()));
+n > 10 ? e() : (n++, T().is(":visible") && (N(), e()));
 }, 100);
 }
 }, D = _.debounce(function() {
-I(!0), w(), R(), k(), E(), P();
+N(!0), w(), R(), k(), E(), P();
 }, 100);
 p.on("resize", D);
 var A, B = function() {
@@ -11286,7 +11291,7 @@ n++, L.appendChild(f(n, e)), U();
 };
 (A = c.createStream(b, C, t.context, e)).onMessage(function(r, o, i) {
 t.$evalAsync(function() {
-t.empty = !1, "logs" !== t.state && (t.state = "logs", N());
+t.empty = !1, "logs" !== t.state && (t.state = "logs", I());
 }), r && (e.limitBytes && i >= e.limitBytes && (t.$evalAsync(function() {
 t.limitReached = !0, t.loading = !1;
 }), O(!0)), a(r), !t.largeLog && n >= e.tailLines && t.$evalAsync(function() {
@@ -13783,7 +13788,7 @@ controller: [ "$filter", "$routeParams", "$rootScope", "Constants", function(e, 
 var r = this, o = _.get(a, "DISABLE_GLOBAL_EVENT_WATCH"), i = e("isIE")() || e("isEdge")();
 r.hide = !0;
 var s = [], c = [], l = function(e, t) {
-e && c.push(n.$on("notification-drawer:count", t));
+e && c.push(n.$on("NotificationDrawerWrapper.count", t));
 }, u = function() {
 _.each(c, function(e) {
 e && e();
@@ -13796,7 +13801,7 @@ e();
 r.hide = !e;
 };
 r.onClick = function() {
-n.$emit("notification-drawer:toggle");
+n.$emit("NotificationDrawerWrapper.toggle");
 };
 var p = function(e, t) {
 r.showNewNotificationIndicator = !!t;
@@ -13808,7 +13813,7 @@ l(t.project, p), m(t.project);
 r.$onInit = function() {
 o || i ? r.hide = !0 : (t.project && f(), s.push(n.$on("$routeChangeSuccess", function(e, t, n) {
 g(t, n) && f();
-})), s.push(n.$on("notification-drawer:mark-read", function() {
+})), s.push(n.$on("NotificationDrawerWrapper.onMarkAllRead", function() {
 r.showNewNotificationIndicator = !1;
 })));
 }, r.$onDestroy = function() {
@@ -13849,20 +13854,20 @@ o.$applyAsync(function() {
 e.counts = _.map(_.countBy(e.notifications, "event.type"), function(e, t) {
 var n = {};
 return n.type = t, n.value = e, n;
-}), e.totalUnread = P(e.notifications).length, e.hasUnread = !!e.totalUnread, o.$emit("notification-drawer:count", e.totalUnread);
+}), e.totalUnread = P(e.notifications).length, e.hasUnread = !!e.totalUnread, o.$emit("NotificationDrawerWrapper.count", e.totalUnread);
 });
 }, E = function() {
 _.each(y, R);
 }, T = function(e) {
 return _.orderBy(e, [ "event.lastTimestamp", "event.firstTimestamp" ], [ "desc", "desc" ]);
-}, I = function(e) {
+}, N = function(e) {
 var t = _.sortBy(e, function(e) {
 return e.heading;
 });
 return _.each(t, function(e) {
 e.notifications = T(e.notifications), e.counts = R(e);
 }), t;
-}, N = function(e) {
+}, I = function(e) {
 var t = {};
 return S(t, r.project), _.each(e, function(e) {
 l.isImportantEvent(e) && !l.isCleared(e) && (S(t, e.metadata.namespace), t[e.metadata.namespace].notifications.push({
@@ -13884,7 +13889,7 @@ return e.project.metadata.name === r.project;
 });
 });
 }, B = function(e) {
-h = e.by("metadata.name"), v = N(h), y = I(v), A();
+h = e.by("metadata.name"), v = I(h), y = N(v), A();
 }, L = {
 Normal: "pficon pficon-info",
 Warning: "pficon pficon-warning-triangle-o"
@@ -13903,12 +13908,12 @@ g.drawerHidden = !0;
 onMarkAllRead: function(e) {
 _.each(e.notifications, function(e) {
 e.unread = !1, l.markRead(e.event);
-}), A(), o.$emit("notification-drawer:mark-read");
+}), A(), o.$emit("NotificationDrawerWrapper.onMarkAllRead");
 },
 onClearAll: function(e) {
 _.each(e.notifications, function(e) {
 l.markRead(e.event), l.markCleared(e.event);
-}), e.notifications = [], A(), o.$emit("notification-drawer:mark-read");
+}), e.notifications = [], A(), o.$emit("NotificationDrawerWrapper.onMarkAllRead");
 },
 notificationGroups: y,
 headingInclude: "views/directives/notifications/header.html",
@@ -13941,7 +13946,7 @@ k(r.project, B), $(r.project), A();
 g.$onInit = function() {
 m || p || (r.project && O(), f.push(o.$on("$routeChangeSuccess", function(e, t, n) {
 U(t, n) && (g.customScope.projectName = r.project, O());
-})), f.push(o.$on("notification-drawer:toggle", function() {
+})), f.push(o.$on("NotificationDrawerWrapper.toggle", function() {
 g.drawerHidden = !g.drawerHidden;
 })));
 }, g.$onDestroy = function() {
