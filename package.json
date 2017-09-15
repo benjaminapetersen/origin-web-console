@@ -39,7 +39,9 @@
     "grunt-newer": "0.7.0",
     "grunt-ng-annotate": "0.3.2",
     "grunt-postcss": "^0.8.0",
-    "grunt-protractor-runner": "1.2.1",
+
+    "grunt-protractor-runner": "^5.0.0",
+
     "grunt-replace": "1.0.1",
     "grunt-svgmin": "0.4.0",
     "grunt-usemin": "2.4.0",
@@ -48,7 +50,6 @@
     "imagemin": "1.0.5",
 
     "jasmine-core": "^2.8.0",
-    "jasmine-beforeall": "0.1.1",
     "jasmine-spec-reporter": "1.1.2",
 
     "jshint-stylish": "0.2.0",
@@ -84,6 +85,7 @@
     "serve": "grunt serve",
     "start": "grunt serve",
     "test-integration": "grunt test-integration",
+    "postinstall": "webdriver-manager update",
     "__postinstall": "node test/upgrade-selenium.js && node_modules/protractor/bin/webdriver-manager update",
     "_postinstall": "node_modules/protractor/bin/webdriver-manager update"
   }

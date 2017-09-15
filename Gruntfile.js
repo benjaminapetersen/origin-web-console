@@ -635,6 +635,7 @@ module.exports = function (grunt) {
           baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/")
         }
       },
+      // default is the same as above?
       default: {
         options: {
           configFile: "test/protractor.conf.js",
@@ -644,15 +645,16 @@ module.exports = function (grunt) {
           }
         }
       },
-      mac: {
-        options: {
-          configFile: "test/protractor-mac.conf.js",
-          args: {
-            baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-            browser: grunt.option('browser') || "firefox"
-          }
-        }
-      }
+      // ideally we want to drop this.
+      // mac: {
+      //   options: {
+      //     configFile: "test/protractor-mac.conf.js",
+      //     args: {
+      //       baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
+      //       browser: grunt.option('browser') || "firefox"
+      //     }
+      //   }
+      // }
     },
 
     // Settings for grunt-istanbul-coverage
@@ -752,14 +754,17 @@ module.exports = function (grunt) {
   grunt.registerTask('test-integration',
     // if a baseUrl is defined assume we dont want to run the local grunt server
     grunt.option('baseUrl') ?
-      [isMac ? 'protractor:mac' : 'protractor:default'] :
+      // if a baseUrl is defined assume we dont want to run the local grunt server
+      // [isMac ? 'protractor:mac' : 'protractor:default'] :
+      ['protractor:default'] :  // TODO: 
       [
         'clean:server',
         'development-build',
         'postcss',
         'connect:test',
         'add-redirect-uri',
-        (isMac ? 'protractor:mac' : 'protractor:default'),
+        //(isMac ? 'protractor:mac' : 'protractor:default'),
+        'protractor:default',
         'clean:server'
       ]
   );
