@@ -85,8 +85,8 @@
     "serve": "grunt serve",
     "start": "grunt serve",
     "test-integration": "grunt test-integration",
-    "postinstall": "webdriver-manager update",
-    "__postinstall": "node test/upgrade-selenium.js && node_modules/protractor/bin/webdriver-manager update",
-    "_postinstall": "node_modules/protractor/bin/webdriver-manager update"
+    "postinstall_global": "webdriver-manager update",
+    "postinstall_deprecated": "node test/upgrade-selenium.js && node_modules/protractor/bin/webdriver-manager update",
+    "postinstall": "node_modules/protractor/bin/webdriver-manager update"
   }
 }
