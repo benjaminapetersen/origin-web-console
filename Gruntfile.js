@@ -636,7 +636,12 @@ module.exports = function (grunt) {
         noColor: false,
         args: {
           suite: grunt.option('suite') || 'full',
-          baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/")
+          baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
+          browser: grunt.option('browser') ?
+                    grunt.option('browser') :
+                    isMac ?
+                      'chrome' :
+                      'firefox'
         }
       },
       // default is the same as above?
@@ -645,7 +650,11 @@ module.exports = function (grunt) {
           configFile: "test/protractor.conf.js",
           args: {
             baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-            browser: grunt.option('browser') || "firefox"
+            browser: grunt.option('browser') ?
+                      grunt.option('browser') :
+                      isMac ?
+                        'chrome' :
+                        'firefox'
           }
         }
       },
