@@ -625,6 +625,10 @@ module.exports = function (grunt) {
       }
     },
 
+    // TODO:
+    // - use the isMac flag to swap out the browser used here.
+    // - on Mac we can prob just use Chrome, but Fedora/CI we should
+    //   use Firefox (CI maybe can use Nightmare if headless Firefox is a prob)
     protractor: {
       options: {
         configFile: "test/protractor.conf.js",
@@ -756,7 +760,7 @@ module.exports = function (grunt) {
     grunt.option('baseUrl') ?
       // if a baseUrl is defined assume we dont want to run the local grunt server
       // [isMac ? 'protractor:mac' : 'protractor:default'] :
-      ['protractor:default'] :  // TODO: 
+      ['protractor:default'] :  // TODO:
       [
         'clean:server',
         'development-build',

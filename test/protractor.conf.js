@@ -17,7 +17,7 @@ exports.config = {
     showColors: true
   },
   multiCapabilities: [
-    {'browserName': 'firefox'},
+    // {'browserName': 'firefox'},
     {'browserName': 'chrome'}
     //{'browserName': 'phantomjs'}
   ],
