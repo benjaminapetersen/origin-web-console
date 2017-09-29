@@ -1,24 +1,29 @@
 'use strict';
 
-const h = require('../helpers');
+const logger = require('../helpers/logger');
+const windowHelper = require('../helpers/window');
 const projectHelpers = require('../helpers/project');
-const CatalogPage = require('../page-objects/catalog').CatalogPage;
+const CatalogPage = require('../page-objects/legacyCatalog').LegacyCatalogPage;
 const CreateProjectPage = require('../page-objects/createProject').CreateProjectPage;
 const DeploymentsPage = require('../page-objects/deployments').DeploymentsPage;
 const ServicesPage = require('../page-objects/services').ServicesPage;
 const RoutesPage = require('../page-objects/routes').RoutesPage;
+const LoginPage = require('../page-objects/login').LoginPage;
+
 const nodeMongoTemplate = require('../fixtures/nodejs-mongodb');
 
 describe('User adds a template to a project', () => {
 
   beforeEach(() => {
-    h.commonSetup();
-    h.login();
+    windowHelper.setSize();
+    let loginPage = new LoginPage();
+    loginPage.login();
+    browser.driver.sleep(1000);
     projectHelpers.deleteAllProjects();
   });
 
   afterEach(() => {
-    h.commonTeardown();
+    windowHelper.clearStorage();
   });
 
   describe('after creating a new project', () => {
@@ -37,17 +42,18 @@ describe('User adds a template to a project', () => {
             // verify we have the 2 deployments in the template
             let deploymentsPage = new DeploymentsPage(project);
             deploymentsPage.visit();
-            expect(element(by.cssContainingText('td', 'mongodb')).isPresent()).toBe(true); // TODO: use fixture
-            expect(element(by.cssContainingText('td', 'nodejs-mongodb-example')).isPresent()).toBe(true); // TODO: use fixture
+            expect(element(by.cssContainingText('td a', 'mongodb')).isPresent()).toBe(true); // TODO: use fixture
+            expect(element(by.cssContainingText('td a', 'nodejs-mongodb-example')).isPresent()).toBe(true); // TODO: use fixture
             // verify we have the two services in the template
             let servicesPage = new ServicesPage(project);
             servicesPage.visit();
-            expect(element(by.cssContainingText('td', 'mongodb')).isPresent()).toBe(true); // TODO: use fixture
-            expect(element(by.cssContainingText('td', 'nodejs-mongodb-example')).isPresent()).toBe(true); // TODO: use fixture
+            expect(element(by.cssContainingText('td a', 'mongodb')).isPresent()).toBe(true); // TODO: use fixture
+            expect(element(by.cssContainingText('td a', 'nodejs-mongodb-example')).isPresent()).toBe(true); // TODO: use fixture
             // verify we have one route for the mongo app
             let routesPage = new RoutesPage(project);
             routesPage.visit();
-            expect(element(by.cssContainingText('td', 'nodejs-mongodb-example')).isPresent()).toBe(true); // TODO: use fixture
+            browser.pause();
+            expect(element(by.cssContainingText('td a', 'nodejs-mongodb-example')).isPresent()).toBe(true); // TODO: use fixture
           });
       });
 

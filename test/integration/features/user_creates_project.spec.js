@@ -2,7 +2,9 @@
 /* jshint unused:false */
 
 const h = require('../helpers.js');
+const windowHelper = require('../helpers/window');
 const projectHelpers = require('../helpers/project.js');
+const LoginPage = require('../page-objects/login').LoginPage;
 
 let goToAddToProjectPage = (projectName) => {
   let uri = 'project/' + projectName + '/create';
@@ -108,12 +110,15 @@ describe('', () => {
   describe('authenticated e2e-user', () => {
 
     beforeEach(() => {
-      h.commonSetup();
-      h.login();
+      windowHelper.setSize();
+      let loginPage = new LoginPage();
+      loginPage.login();
+      browser.driver.sleep(1000);
+      projectHelpers.deleteAllProjects();
     });
 
     afterEach(() => {
-      h.commonTeardown();
+      windowHelper.clearStorage();
     });
 
     describe('new project', () => {

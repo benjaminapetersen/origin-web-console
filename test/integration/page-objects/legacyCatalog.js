@@ -4,7 +4,7 @@ const h = require('../helpers.js');
 const Page = require('./page').Page;
 const AddTemplateModal = require('./modals/addTemplateModal').AddTemplateModal;
 
-class CatalogPage extends Page {
+class LegacyCatalogPage extends Page {
   constructor(project, menu) {
     super(project, menu);
   }
@@ -89,4 +89,4 @@ class CatalogPage extends Page {
   }
 }
 
-exports.CatalogPage = CatalogPage;
+exports.LegacyCatalogPage = LegacyCatalogPage;

@@ -2,7 +2,8 @@
 
 const h = require('../helpers');
 const Page = require('./page').Page;
-const scroller = require('../helpers/scroll'); 
+const wait = require('../helpers/wait');
+const scroller = require('../helpers/scroll');
 
 class CreateFromTemplatePage extends Page {
   constructor(project, menu) {
@@ -16,12 +17,20 @@ class CreateFromTemplatePage extends Page {
     return url;
   }
   clickCreate() {
-    scroller.toBottom();
-    let button = element(by.buttonText('Create'));
-    h.waitForElem(button);
-    return button.click().then(() => {
-      const OverviewPage = require('./overview').OverviewPage;
-      return new OverviewPage(this.project);
+
+    // SOMETHING IS WONKY HERE >>>>
+    // SOMETHING IS WONKY HERE >>>>
+    // SOMETHING IS WONKY HERE >>>>
+    
+
+    return scroller.toBottom().then(() => {
+      let button = element(by.buttonText('Create'));
+      return wait.forElem(button).then(() => {
+        return button.click().then(() => {
+          const OverviewPage = require('./overview').OverviewPage;
+          return new OverviewPage(this.project);
+        });
+      });
     });
   }
 }

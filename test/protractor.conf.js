@@ -1,6 +1,8 @@
 'use strict';
 
 exports.config = {
+  // https://github.com/angular/protractor/issues/4233
+  // rootElement: 'html',
   specs: [
     'integration/**/*.js'
   ],

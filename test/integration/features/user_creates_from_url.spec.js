@@ -1,16 +1,21 @@
 'use strict';
 
 const h = require('../helpers');
+const windowHelper = require('../helpers/window');
 const addExtension = require('../helpers/extensions').addExtension;
 const resetExtensions = require('../helpers/extensions').resetExtensions;
 const matchersHelpers = require('../helpers/matchers');
 const projectHelpers = require('../helpers/project');
 const inputsHelpers = require('../helpers/inputs');
+
 const CreateFromURLPage = require('../page-objects/createFromURL').CreateFromURLPage;
 const CreateProjectPage = require('../page-objects/createProject').CreateProjectPage;
-const CatalogPage = require('../page-objects/catalog').CatalogPage;
+const CatalogPage = require('../page-objects/legacyCatalog').LegacyCatalogPage;
+const LoginPage = require('../page-objects/login').LoginPage;
+
 const nodeMongoTemplate = require('../fixtures/nodejs-mongodb');
 const centosImageStream = require('../fixtures/image-streams-centos7.json');
+
 
 describe('authenticated e2e-user', function() {
 
@@ -38,9 +43,12 @@ describe('authenticated e2e-user', function() {
     catalogPage.saveTemplate(JSON.stringify(nodeMongoTemplate));
   };
 
+  // NOTE: beforeAll vs beforeEach.
   beforeAll(function() {
-    h.commonSetup();
-    h.login();
+    windowHelper.setSize();
+    let loginPage = new LoginPage();
+    loginPage.login();
+    browser.driver.sleep(1000);
     projectHelpers.deleteAllProjects();
     setupEnv();
   });
@@ -50,6 +58,7 @@ describe('authenticated e2e-user', function() {
     resetExtensions();
     h.afterAllTeardown();
   });
+
 
   describe('create from URL', function() {
 

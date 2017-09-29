@@ -1,6 +1,7 @@
 'use strict';
 
 var h = require('./helpers.js');
+const LoginPage = require('./page-objects/login').LoginPage;
 
 describe('', function() {
   afterAll(function(){
@@ -18,30 +19,14 @@ describe('', function() {
     afterEach(function() {
       h.commonTeardown();
     });
-
-    it('should be able to log in', function() {
-      browser.get('/');
-      // The login page doesn't use angular, so we have to use the underlying WebDriver instance
-      var driver = browser.driver;
-      driver.wait(function() {
-        return driver.isElementPresent(by.name("username"));
-      }, 3000);
-
-      expect(browser.driver.getCurrentUrl()).toMatch(/\/login/);
-      expect(browser.driver.getTitle()).toMatch(/Login -/);
-
-      h.login(true);
-
-      expect(browser.getTitle()).toEqual("OpenShift Web Console");
-      expect(element(by.css(".navbar-iconic .username")).getText()).toEqual("e2e-user");
-    });
-
   });
 
   describe('authenticated e2e-user', function() {
     beforeEach(function() {
       h.commonSetup();
-      h.login();
+      let loginPage = new LoginPage();
+      loginPage.login();
+      browser.driver.sleep(1000);
     });
 
     afterEach(function() {
