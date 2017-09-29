@@ -15,7 +15,6 @@ module.exports = function (grunt) {
   var contextRoot = grunt.option('contextRoot') || "dev-console";
   var isMac = /^darwin/.test(process.platform) || grunt.option('mac');
 
-
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt, {
     pattern: ['grunt-*', '!grunt-template-jasmine-istanbul']
@@ -766,6 +765,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test-integration',
     // if a baseUrl is defined assume we dont want to run the local grunt server
+    // if --skipRebuild, don't spend time with all the build tasks...
     grunt.option('baseUrl') ?
       // if a baseUrl is defined assume we dont want to run the local grunt server
       // [isMac ? 'protractor:mac' : 'protractor:default'] :
@@ -781,6 +781,12 @@ module.exports = function (grunt) {
         'clean:server'
       ]
   );
+
+  // atm, just a quicker version of the above (maybe)
+  grunt.registerTask('test-e2e', [
+    'connect:test',
+    'protractor:default'
+  ]);
 
   grunt.registerTask('build', [
     'clean:dist',
