@@ -38,7 +38,9 @@ describe('User adds a template to a project', () => {
         catalogPage
           .processTemplate(JSON.stringify(nodeMongoTemplate))
           .then((createFromTemplatePage) => {
-            createFromTemplatePage.clickCreate();             // implicit redirect to overview page
+            // implicit redirect to overview page
+            createFromTemplatePage.clickCreate();
+
             // verify we have the 2 deployments in the template
             let deploymentsPage = new DeploymentsPage(project);
             deploymentsPage.visit();
@@ -52,7 +54,6 @@ describe('User adds a template to a project', () => {
             // verify we have one route for the mongo app
             let routesPage = new RoutesPage(project);
             routesPage.visit();
-            browser.pause();
             expect(element(by.cssContainingText('td a', 'nodejs-mongodb-example')).isPresent()).toBe(true); // TODO: use fixture
           });
       });
