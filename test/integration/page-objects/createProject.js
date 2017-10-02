@@ -2,6 +2,7 @@
 
 const h = require('../helpers.js');
 const Page = require('./page').Page;
+const ProjectList = require('./projectList').ProjectList;
 
 class CreateProjectPage extends Page {
   constructor(project, menu) {
@@ -19,7 +20,9 @@ class CreateProjectPage extends Page {
   }
   submit() {
     let button = element(by.buttonText('Create'));
-    button.click();
+    button.click().then(() => {
+      return new ProjectList();
+    });
   }
   // TODO: there is an implicit navigation here, this should return a new Overview page for clarity
   createProject() {

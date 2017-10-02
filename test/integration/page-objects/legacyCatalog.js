@@ -61,7 +61,12 @@ class LegacyCatalogPage extends Page {
     });
   }
   submitImageStream() {
-    element(by.cssContainingText('.btn-primary','Create')).click();
+    return element(by.cssContainingText('.btn-primary','Create'))
+            .click().then(() => {
+              // delay to allow the server to generate
+              // resources before continuing through the flow.
+              return browser.sleep(500);
+            });
   }
   processTemplate(templateStr) {
     this.clickImport();
