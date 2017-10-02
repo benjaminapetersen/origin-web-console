@@ -1,9 +1,8 @@
 'use strict';
 
-const h = require('../helpers');
+const winHelper = require('../helpers/window');
 const Page = require('./page').Page;
-const wait = require('../helpers/wait');
-const scroller = require('../helpers/scroll');
+const EC = protractor.ExpectedConditions;
 
 class CreateFromTemplatePage extends Page {
   constructor(project, menu) {
@@ -17,19 +16,18 @@ class CreateFromTemplatePage extends Page {
     return url;
   }
   clickCreate() {
-
-    // SOMETHING IS WONKY HERE >>>>
-    // SOMETHING IS WONKY HERE >>>>
-    // SOMETHING IS WONKY HERE >>>>
-    
-
-    return scroller.toBottom().then(() => {
-      let button = element(by.buttonText('Create'));
-      return wait.forElem(button).then(() => {
-        return button.click().then(() => {
-          const OverviewPage = require('./overview').OverviewPage;
-          return new OverviewPage(this.project);
-        });
+    let button = element(by.buttonText('Create'));
+    winHelper.scrollToElement(button);
+    browser.wait(EC.elementToBeClickable(button), 15000, 'Create button is not clickable');
+    return button.click().then(() => {
+      // hiding a delay in here since the action will cause the server
+      // to create resources & any actions following clickCreate() will
+      // likely expect DOM nodes to exist (that will not until these
+      // resources are generated)
+      return browser.sleep(500).then(() => {
+        // implicit redirect
+        const NextStepsPage = require('./nextSteps').NextStepsPage;
+        return new NextStepsPage(this.project);
       });
     });
   }
