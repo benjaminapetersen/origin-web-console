@@ -18,6 +18,13 @@ exports.config = {
     // simple test to ensure we can get past OAuth
     'login': 'integration/features/user_logs_in.spec.js',
     // e2e: 'integration/e2e.js'
+    // control the sets of suites run in travis, since we keep having issues
+    // with certain suites, this can help us switch them on and off.
+    'travis': [
+      'integration/features/user_logs_in.spec.js',
+      'integration/features/user_adds_template_to_project.spec.js',
+      'integration/features/user_adds_imagestream_to_project.spec.js'
+    ]
   },
   //baseUrl: 'http://localhost:9000/',
   framework: 'jasmine',
