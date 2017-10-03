@@ -68,7 +68,7 @@
     "load-grunt-tasks": "0.4.0",
     "lodash": "3.10.1",
 
-    "protractor": "^5.1.2",
+    "protractor": "5.1.1",
     "protractor-screenshot-reporter": "^0.0.5",
 
     "serve-static": "1.10.2",
@@ -87,6 +87,7 @@
     "test-integration": "grunt test-integration",
     "postinstall_global": "webdriver-manager update",
     "postinstall_deprecated": "node test/upgrade-selenium.js && node_modules/protractor/bin/webdriver-manager update",
-    "postinstall": "node_modules/protractor/bin/webdriver-manager update"
+    "postinstall": "node_modules/protractor/bin/webdriver-manager update",
+    "install_protractor_backup": "rm -rf node_modules/protractor && cp -pr test/package_backups/protractor_5.1.2 -T node_modules/protractor"
   }
 }
