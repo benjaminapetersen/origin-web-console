@@ -11,10 +11,10 @@ exports.config = {
   // grunt test-integration --suite=create-project
   // grunt test-integration --suite=create-projct,add-template-to-project
   suites: {
-    'create-project': 'integration/features/user_creates_project.spec.js', // This suite of tests should only require a running master api, it should not require a node
+    // TODO: 'create-project': 'integration/features/user_creates_project.spec.js', // This suite of tests should only require a running master api, it should not require a node
     'add-template-to-project': 'integration/features/user_adds_template_to_project.spec.js',
     'add-imagestream-to-project': 'integration/features/user_adds_imagestream_to_project.spec.js',
-    'create-from-url': 'integration/features/user_creates_from_url.spec.js',
+    // TODO: 'create-from-url': 'integration/features/user_creates_from_url.spec.js',
     // simple test to ensure we can get past OAuth
     'login': 'integration/features/user_logs_in.spec.js',
     // e2e: 'integration/e2e.js'
@@ -36,4 +36,4 @@ exports.config = {
       password: '1234'
     }
   }
-}
+};
