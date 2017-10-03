@@ -1,23 +1,19 @@
 'use strict';
 
-const windowHelper = require('../helpers/window');
+const common = require('../helpers/common');
 const projectHelpers = require('../helpers/project');
 const matchers = require('../helpers/matchers');
 
-const LoginPage = require('../page-objects/login').LoginPage;
 const CreateProjectPage = require('../page-objects/createProject').CreateProjectPage;
 
 describe('Authenticated user creates a new project', () => {
+
   beforeEach(() => {
-    windowHelper.setSize();
-    let loginPage = new LoginPage();
-    loginPage.login();
-    browser.driver.sleep(1000);
-    projectHelpers.deleteAllProjects();
+    common.beforeEach();
   });
 
   afterEach(() => {
-    windowHelper.clearStorage();
+    common.afterEach();
   });
 
   it('should be able to create a new project', () => {

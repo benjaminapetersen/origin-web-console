@@ -1,28 +1,24 @@
 'use strict';
 
-const windowHelper = require('../helpers/window');
+const common = require('../helpers/common');
 const projectHelpers = require('../helpers/project');
+
 const CatalogPage = require('../page-objects/legacyCatalog').LegacyCatalogPage;
 const CreateProjectPage = require('../page-objects/createProject').CreateProjectPage;
 const DeploymentsPage = require('../page-objects/deployments').DeploymentsPage;
 const ServicesPage = require('../page-objects/services').ServicesPage;
 const RoutesPage = require('../page-objects/routes').RoutesPage;
-const LoginPage = require('../page-objects/login').LoginPage;
 
 const nodeMongoTemplate = require('../fixtures/nodejs-mongodb');
 
 describe('User adds a template to a project', () => {
 
   beforeEach(() => {
-    windowHelper.setSize();
-    let loginPage = new LoginPage();
-    loginPage.login();
-    browser.driver.sleep(1000);
-    projectHelpers.deleteAllProjects();
+    common.beforeEach();
   });
 
   afterEach(() => {
-    windowHelper.clearStorage();
+    common.afterEach();
   });
 
   describe('after creating a new project', () => {

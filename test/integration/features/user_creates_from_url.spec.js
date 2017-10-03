@@ -1,7 +1,6 @@
 'use strict';
 
-const h = require('../helpers');
-const windowHelper = require('../helpers/window');
+const common = require('../helpers/common');
 const addExtension = require('../helpers/extensions').addExtension;
 const resetExtensions = require('../helpers/extensions').resetExtensions;
 const matchersHelpers = require('../helpers/matchers');
@@ -11,7 +10,6 @@ const inputsHelpers = require('../helpers/inputs');
 const CreateFromURLPage = require('../page-objects/createFromURL').CreateFromURLPage;
 const CreateProjectPage = require('../page-objects/createProject').CreateProjectPage;
 const CatalogPage = require('../page-objects/legacyCatalog').LegacyCatalogPage;
-const LoginPage = require('../page-objects/login').LoginPage;
 
 const nodeMongoTemplate = require('../fixtures/nodejs-mongodb');
 const centosImageStream = require('../fixtures/image-streams-centos7.json');
@@ -44,21 +42,16 @@ describe('authenticated e2e-user', function() {
   };
 
   // NOTE: beforeAll vs beforeEach.
-  beforeAll(function() {
-    windowHelper.setSize();
-    let loginPage = new LoginPage();
-    loginPage.login();
-    browser.driver.sleep(1000);
-    projectHelpers.deleteAllProjects();
+  // these tests only do the setup once.
+  beforeAll(() => {
+    common.beforeEach();
     setupEnv();
   });
 
-  afterAll(function() {
-    projectHelpers.deleteAllProjects();
+  afterAll(() => {
+    common.afterEach();
     resetExtensions();
-    h.afterAllTeardown();
   });
-
 
   describe('create from URL', function() {
 

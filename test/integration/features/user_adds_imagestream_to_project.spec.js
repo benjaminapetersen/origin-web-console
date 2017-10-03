@@ -1,26 +1,22 @@
 'use strict';
 
-const windowHelper = require('../helpers/window');
+const common = require('../helpers/common');
 const projectHelpers = require('../helpers/project');
+
 const CatalogPage = require('../page-objects/legacyCatalog').LegacyCatalogPage;
 const CreateProjectPage = require('../page-objects/createProject').CreateProjectPage;
 const ImageStreamsPage = require('../page-objects/imageStreams').ImageStreamsPage;
-const LoginPage = require('../page-objects/login').LoginPage;
 
 const centosImageStream = require('../fixtures/image-streams-centos7.json');
 
 describe('User adds an image stream to a project', () => {
 
   beforeEach(() => {
-    windowHelper.setSize();
-    let loginPage = new LoginPage();
-    loginPage.login();
-    browser.driver.sleep(1000);
-    projectHelpers.deleteAllProjects();
+    common.beforeEach();
   });
 
   afterEach(() => {
-    windowHelper.clearStorage();
+    common.afterEach();
   });
 
   describe('after creating a new project', () => {
