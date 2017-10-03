@@ -2,7 +2,7 @@
 
 // FIXME: these are nice methods, but something has changed in the API
 // will come back and fix once the tests run again.
-exports.setSize = (height = 2024, width = 2048) => {
+exports.setSize = (/*height = 2024, width = 2048*/) => {
   console.log('skipping window.setSize()...');
   // return browser.driver.manage().window().setSize(height, width);
   // hacking around with solutions:

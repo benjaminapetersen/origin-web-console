@@ -14,3 +14,15 @@ exports.expectPartialHeading = (partialText, level, caseSensitive) => {
     expect(text).toContain(partialText);
   });
 };
+
+exports.expectElementToExist = (elem) => {
+  expect(elem.isPresent()).toBe(true);
+};
+
+exports.expectElementToBeVisible = (elem) => {
+  expect(elem.isDisplayed()).toBeTruthy();
+};
+
+exports.expectElementToBeHidden = (elem) => {
+  expect(elem.isDisplayed()).toBeFalsy();
+};

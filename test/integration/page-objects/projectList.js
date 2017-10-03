@@ -1,6 +1,6 @@
 'use strict';
 
-const Page = require('./Page').Page
+const Page = require('./Page').Page;
 
 class ProjectList extends Page {
   constructor(project, menu) {
@@ -12,6 +12,12 @@ class ProjectList extends Page {
   // ?name=Node.js%20%2B%20MongoDB%20(Ephemeral)
   getUrl() {
     return 'projects';
+  }
+  findProjectTiles() {
+    return element.all(by.css('.list-group-item'));
+  }
+  findTileBy(projectName) {
+    return element(by.cssContainingText(projectName));
   }
 }
 

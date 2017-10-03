@@ -1,6 +1,5 @@
 'use strict';
 
-const logger = require('../helpers/logger');
 const windowHelper = require('../helpers/window');
 const projectHelpers = require('../helpers/project');
 const CatalogPage = require('../page-objects/legacyCatalog').LegacyCatalogPage;

@@ -1,7 +1,6 @@
 'use strict';
 
 var EC = protractor.ExpectedConditions;
-const nonAngular = require('./helpers/nonAngular').nonAngular;
 
 var commonTeardown = function() {
   browser.executeScript('window.sessionStorage.clear();');
@@ -19,7 +18,7 @@ exports.afterAllTeardown = function() {
   browser.driver.sleep(1000);
 };
 
-exports.login = function(loginPageAlreadyLoaded) {
+exports.login = function() {
   console.log('DEPRECATED: use /page-objects/login.js via loginPage.login()');
 };
 

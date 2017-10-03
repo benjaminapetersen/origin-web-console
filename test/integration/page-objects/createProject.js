@@ -20,7 +20,7 @@ class CreateProjectPage extends Page {
   }
   submit() {
     let button = element(by.buttonText('Create'));
-    button.click().then(() => {
+    return button.click().then(() => {
       return new ProjectList();
     });
   }
