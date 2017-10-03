@@ -1,6 +1,6 @@
 'use strict';
 
-const Page = require('./Page').Page;
+const Page = require('./page').Page;
 
 class NextStepsPage extends Page {
   constructor(project, menu) {

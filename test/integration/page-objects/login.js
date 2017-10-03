@@ -2,7 +2,7 @@
 
 const environment = require('../environment');
 const nonAngular = require('../helpers/nonAngular').nonAngular;
-const Page = require('./Page').Page;
+const Page = require('./page').Page;
 
 // login page is a non-angular page
 class LoginPage extends Page  {

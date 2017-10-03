@@ -1,11 +1,18 @@
 'use strict';
 
 exports.config = {
+  // TODO: decide if we want to pull these down & install them
+  // and commit them so we don't have to worry about things changing
+  // on us:
+  // chromeDriver: '',  // https://sites.google.com/a/chromium.org/chromedriver/downloads
+  // geckoDriver: '',   // https://github.com/mozilla/geckodriver/releases
   // https://github.com/angular/protractor/issues/4233
   // rootElement: 'html',
-  specs: [
-    'integration/**/*.js'
-  ],
+  // we want to specify individual suites, not a glob of specs
+  // https://github.com/angular/protractor/blob/master/lib/config.ts#L225
+  // specs: [
+  //   'integration/**/*.js'
+  // ],
   // running `grunt test-integration` with the --suite flag will
   // run only the suites specified:
   // grunt test-integration --suite=create-project
@@ -31,11 +38,12 @@ exports.config = {
   jasmineNodeOpts: {
     showColors: true
   },
-  multiCapabilities: [
-    // {'browserName': 'firefox'},
-    {'browserName': 'chrome'}
-    //{'browserName': 'phantomjs'}
-  ],
+  // TODO: do not set this if browser is set in the Grunt task
+  // multiCapabilities: [
+  //   // {'browserName': 'firefox'},
+  //   // {'browserName': 'chrome'}
+  //   // {'browserName': 'phantomjs'}
+  // ],
   // do we still use this?
   params: {
     login: {
