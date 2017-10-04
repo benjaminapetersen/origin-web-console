@@ -88,6 +88,8 @@
     "postinstall_global": "webdriver-manager update",
     "postinstall_deprecated": "node test/upgrade-selenium.js && node_modules/protractor/bin/webdriver-manager update",
     "postinstall": "node_modules/protractor/bin/webdriver-manager update",
-    "install_protractor_backup": "rm -rf node_modules/protractor && cp -pr test/package_backups/protractor_5.1.2 -T node_modules/protractor"
+    "install_protractor_backup": "rm -rf node_modules/protractor && cp -pr test/package_backups/protractor_5.1.2 -T node_modules/protractor",
+    "webdriver-update-3.4.0": "node ./node_modules/protractor/bin/webdriver-manager update --standalone --versions.standalone 3.4.0",
+    "webdriver-manager-drivers": "webdriver-manager status"
   }
 }

@@ -638,9 +638,13 @@ module.exports = function (grunt) {
           baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
           browser: grunt.option('browser') ?
                     grunt.option('browser') :
-                    isMac ?
-                      'chrome' :
-                      'firefox'
+                    // TODO: enable this again. temporarily always running firefox
+                    // to debug the cert problem
+                    // isMac ?
+                    // 'firefox',
+                    //   //'chrome' :
+                    //   'firefox'
+                    'firefox'
         }
       },
       // default is the same as above?
@@ -651,9 +655,13 @@ module.exports = function (grunt) {
             baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
             browser: grunt.option('browser') ?
                       grunt.option('browser') :
-                      isMac ?
-                        'chrome' :
-                        'firefox'
+                      // TODO: enable this again. temporarily always running firefox
+                      // to debug the cert problem
+                      // isMac ?
+                      // 'firefox',
+                      //   //'chrome' :
+                      //   'firefox'
+                      'firefox'
           }
         }
       },
