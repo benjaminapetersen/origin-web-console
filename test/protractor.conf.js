@@ -1,5 +1,17 @@
 'use strict';
 
+var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
+var screenshotReporter = new HtmlScreenshotReporter({
+  dest: './test/tmp/screenshots',
+  filename: 'my-report.html',
+  pathBuilder: function(currentSpec, suites, browserCapabilities) {
+   return browserCapabilities.get('browserName') + '/' + currentSpec.fullName;
+  }
+});
+
+
+// https://github.com/angular/protractor/blob/master/docs/browser-setup.md
+// https://github.com/angular/protractor/blob/master/docs/browser-setup.md
 exports.config = {
   // TODO: decide if we want to pull these down & install them
   // and commit them so we don't have to worry about things changing
@@ -38,6 +50,13 @@ exports.config = {
   jasmineNodeOpts: {
     showColors: true
   },
+  capabilities: {
+    'browserName': 'firefox',
+    'marionette': 'true'
+  },
+  // capabilities: {
+  //   acceptSslCerts: true // does this even work?
+  // },
   // TODO: do not set this if browser is set in the Grunt task
   // multiCapabilities: [
   //   // {'browserName': 'firefox'},
@@ -50,5 +69,8 @@ exports.config = {
       user: 'Jane',
       password: '1234'
     }
+  },
+  onPrepare: function() {
+    jasmine.getEnv().addReporter(screenshotReporter);
   }
 };
