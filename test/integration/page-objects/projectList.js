@@ -17,7 +17,10 @@ class ProjectList extends Page {
     return element.all(by.css('.list-group-item'));
   }
   findTileBy(projectName) {
-    return element(by.cssContainingText(projectName));
+    return element(by.cssContainingText('.tile-target', projectName));
+  }
+  clickTileBy(projectName) {
+    return this.findTileBy(projectName).click();
   }
 }
 

@@ -5,6 +5,7 @@ const projectHelpers = require('../helpers/project');
 const matchers = require('../helpers/matchers');
 
 const CreateProjectPage = require('../page-objects/createProject').CreateProjectPage;
+// const OverviewPage = require('../page-objects/overviewPage').OverviewPage;
 
 describe('Authenticated user creates a new project', () => {
 
@@ -20,9 +21,18 @@ describe('Authenticated user creates a new project', () => {
     let project = projectHelpers.projectDetails();
     let createProjectPage = new CreateProjectPage(project);
     createProjectPage.visit();
-    let projectList = createProjectPage.createProject();
-    matchers.expectElementToBeVisible(projectList.findTileBy(project.displayName));
-    browser.pause();
+    createProjectPage.createProject().then((projectList) => {
+      // show the project in the list
+      matchers.expectElementToBeVisible(projectList.findTileBy(project.displayName));
+
+      // navigate to Overview
+      // projectList.clickTileBy(project.displayName);
+      // let overviewPage = new OverviewPage(project);
+
+      // click add to project
+
+      // do the rest of the things....
+    });
   });
 
   // it('should be able to browse builds', () => {
