@@ -634,17 +634,18 @@ module.exports = function (grunt) {
         keepAlive: false, // If false, the grunt process stops when the test fails.
         noColor: false,
         args: {
+          // TODO: acceptSslCerts: true, // DELETE ME! SURELY THIS DOESN'T WORK
           suite: grunt.option('suite') || 'full',
           baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-          browser: grunt.option('browser') ?
-                    grunt.option('browser') :
-                    // TODO: enable this again. temporarily always running firefox
-                    // to debug the cert problem
-                    // isMac ?
-                    // 'firefox',
-                    //   //'chrome' :
-                    //   'firefox'
-                    'firefox'
+          // browser: grunt.option('browser') ?
+          //           grunt.option('browser') :
+          //           // TODO: enable this again. temporarily always running firefox
+          //           // to debug the cert problem
+          //           // isMac ?
+          //           // 'firefox',
+          //           //   //'chrome' :
+          //           //   'firefox'
+          //           'firefox'
         }
       },
       // default is the same as above?
@@ -653,15 +654,15 @@ module.exports = function (grunt) {
           configFile: "test/protractor.conf.js",
           args: {
             baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-            browser: grunt.option('browser') ?
-                      grunt.option('browser') :
-                      // TODO: enable this again. temporarily always running firefox
-                      // to debug the cert problem
-                      // isMac ?
-                      // 'firefox',
-                      //   //'chrome' :
-                      //   'firefox'
-                      'firefox'
+            // browser: grunt.option('browser') ?
+            //           grunt.option('browser') :
+            //           // TODO: enable this again. temporarily always running firefox
+            //           // to debug the cert problem
+            //           // isMac ?
+            //           // 'firefox',
+            //           //   //'chrome' :
+            //           //   'firefox'
+            //           'firefox'
           }
         }
       },

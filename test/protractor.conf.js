@@ -1,7 +1,9 @@
 'use strict';
 
+var isMac = /^darwin/.test(process.platform);
 var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
 var screenshotReporter = new HtmlScreenshotReporter({
+  cleanDestination: isMac ? true : false,
   dest: './test/tmp/screenshots',
   filename: 'my-report.html',
   pathBuilder: function(currentSpec, suites, browserCapabilities) {
@@ -51,8 +53,12 @@ exports.config = {
     showColors: true
   },
   capabilities: {
-    'browserName': 'firefox',
-    'marionette': 'true'
+    // https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#firefoxprofile-settings
+    'browserName': 'chrome', // 'chrome' will run...
+    // 'marionette': true,
+    // 'acceptSslCerts': true, ie only?
+    // 'webdriver_accept_untrusted_certs': true
+    // 'logLevel': 'DEBUG'
   },
   // capabilities: {
   //   acceptSslCerts: true // does this even work?
@@ -72,5 +78,14 @@ exports.config = {
   },
   onPrepare: function() {
     jasmine.getEnv().addReporter(screenshotReporter);
+  },
+  beforeLaunch: function() {
+    // this should force the screenshot reporter to take a screenshot
+    // if an exception is thrown from within a test
+    // https://github.com/mlison/protractor-jasmine2-screenshot-reporter#tips--tricks
+    process.on('uncaughtException', function () {
+      screenshotReporter.jasmineDone();
+      screenshotReporter.afterLaunch();
+    });
   }
 };
