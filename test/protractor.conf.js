@@ -37,16 +37,12 @@ exports.config = {
     'add-imagestream-to-project': 'integration/features/user_adds_imagestream_to_project.spec.js',
     // TODO: 'create-from-url': 'integration/features/user_creates_from_url.spec.js',
     // simple test to ensure we can get past OAuth
-    'login': 'integration/features/user_logs_in.spec.js',
+    'login': 'integration/features/user_logs_in.spec.js'
     // e2e: 'integration/e2e.js'
-    // control the sets of suites run in travis/jenkins, since we keep having issues
-    // with certain suites, this can help us switch them on and off.
-    'cicd': [
-      'integration/features/user_logs_in.spec.js',
-      'integration/features/user_adds_template_to_project.spec.js',
-      'integration/features/user_adds_imagestream_to_project.spec.js'
-    ]
   },
+  exclude: [
+    'integration/features/user_creates_project.legacy.spec.js',
+  ],
   //baseUrl: 'http://localhost:9000/',
   framework: 'jasmine2',
   jasmineNodeOpts: {
