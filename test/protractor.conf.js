@@ -1,16 +1,18 @@
 'use strict';
 
-var isMac = /^darwin/.test(process.platform);
-var HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
-var screenshotReporter = new HtmlScreenshotReporter({
+let isMac = /^darwin/.test(process.platform);
+let SpecReporter = require('jasmine-spec-reporter').SpecReporter;
+let HtmlScreenshotReporter = require('protractor-jasmine2-screenshot-reporter');
+
+let screenshotReporter = new HtmlScreenshotReporter({
   cleanDestination: isMac ? true : false,
   dest: './test/tmp/screenshots',
-  filename: 'my-report.html',
+  filename: 'protractor-e2e-report.html',
+  takeScreenShotsOnlyForFailedSpecs: true,
   pathBuilder: function(currentSpec, suites, browserCapabilities) {
    return browserCapabilities.get('browserName') + '/' + currentSpec.fullName;
   }
 });
-
 
 // https://github.com/angular/protractor/blob/master/docs/browser-setup.md
 // https://github.com/angular/protractor/blob/master/docs/browser-setup.md
@@ -35,18 +37,22 @@ exports.config = {
     'create-project': 'integration/features/user_creates_project.spec.js', // This suite of tests should only require a running master api, it should not require a node
     'add-template-to-project': 'integration/features/user_adds_template_to_project.spec.js',
     'add-imagestream-to-project': 'integration/features/user_adds_imagestream_to_project.spec.js',
-    // TODO: 'create-from-url': 'integration/features/user_creates_from_url.spec.js',
+    'create-from-url': 'integration/features/user_creates_from_url.spec.js',
     // simple test to ensure we can get past OAuth
     'login': 'integration/features/user_logs_in.spec.js'
-    // e2e: 'integration/e2e.js'
   },
-  exclude: [
-    'integration/features/user_creates_project.legacy.spec.js',
-  ],
   //baseUrl: 'http://localhost:9000/',
   framework: 'jasmine2',
+  allScriptsTimeout: 30 * 1000,
+  getPageTimeout: 30 * 1000,
   jasmineNodeOpts: {
-    showColors: true
+    defaultTimeoutInterval: 60 * 1000,
+    isVerbose: true,
+    includeStackTrace: true,
+    showColors: true,
+    // noop to eliminate the dot reporter, since we have
+    // better reporters. see onPrepare below
+    print: function() {}
   },
   capabilities: {
     // https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities#firefoxprofile-settings
@@ -56,24 +62,21 @@ exports.config = {
     // 'webdriver_accept_untrusted_certs': true
     // 'logLevel': 'DEBUG'
   },
-  // capabilities: {
-  //   acceptSslCerts: true // does this even work?
-  // },
-  // TODO: do not set this if browser is set in the Grunt task
+  // TODO: grunt protractor task overrides multiCapabilties, but
+  // ideally we would use this to test multiple browsers.
   // multiCapabilities: [
   //   // {'browserName': 'firefox'},
   //   // {'browserName': 'chrome'}
   //   // {'browserName': 'phantomjs'}
   // ],
-  // do we still use this?
-  params: {
-    login: {
-      user: 'Jane',
-      password: '1234'
-    }
-  },
   onPrepare: function() {
     jasmine.getEnv().addReporter(screenshotReporter);
+
+    jasmine.getEnv().addReporter(new SpecReporter({
+      displayStacktrace: true,
+      displaySuccessfulSpec: false,
+      displayFailedSpec: true
+    }));
   },
   beforeLaunch: function() {
     // this should force the screenshot reporter to take a screenshot
