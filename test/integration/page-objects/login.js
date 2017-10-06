@@ -27,5 +27,4 @@ class LoginPage   {
   }
 }
 
-
 exports.LoginPage = LoginPage;

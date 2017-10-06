@@ -1,6 +1,7 @@
 'use strict';
 
 const h = require('../helpers.js');
+const timing = require('../helpers/timing.js');
 const Page = require('./page').Page;
 const ProjectList = require('./projectList').ProjectList;
 
@@ -21,7 +22,9 @@ class CreateProjectPage extends Page {
   submit() {
     let button = element(by.buttonText('Create'));
     return button.click().then(() => {
-      return new ProjectList();
+      return browser.sleep(timing.implicitRedirect).then(() => {
+        return new ProjectList();
+      });
     });
   }
   // TODO: there is an implicit navigation here, this should return a new Overview page for clarity

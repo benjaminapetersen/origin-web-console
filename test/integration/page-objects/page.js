@@ -1,6 +1,7 @@
 'use strict';
 
 const h = require('../helpers');
+const timing = require('../helpers/timing');
 const logger = require('../helpers/logger');
 const defaultMenus = require('./menus');
 
@@ -10,20 +11,19 @@ class Page {
     this.menus = menus || defaultMenus;
     // Whenever a page is created, we need to give
     // it some time to render
-    browser.sleep(1000);
+    browser.sleep(timing.standardDelay);
   }
   getUrl() {
 
   }
   // Visit should only be used as the initial entry point to
   // the app.  After that, tests should use page.menu.click()
-  // to navigate.  Calling visit essentially performs a
-  // browser refresh each time.
+  // to navigate.
   visit() {
     logger.log('Visiting url (refresh):', this.getUrl());
     return h.goToPage(this.getUrl()).then(() => {
-      // every revisit to a page should pause for rendering
-      browser.sleep(1000);
+      // Calling visit performs a browser refresh each time.
+      browser.sleep(timing.initialVisit);
     });
   }
 

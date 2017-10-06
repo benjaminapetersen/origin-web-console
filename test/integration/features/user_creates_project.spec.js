@@ -22,10 +22,14 @@ describe('Authenticated user creates a new project', () => {
   });
 
   it('should be able to create a new project', () => {
+
     let project = projectHelpers.projectDetails();
     let createProjectPage = new CreateProjectPage(project);
     createProjectPage.visit();
     createProjectPage.createProject().then((projectList) => {
+      // sometimes this flakes out. Perhaps the server takes a little too long
+      // to create the project?
+      browser.sleep(timing.initialVisit);
       // show the project in the list
       matchers.expectElementToBeVisible(projectList.findTileBy(project.displayName));
 
