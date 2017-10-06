@@ -11,7 +11,6 @@ let selectors = {
 
 
 
-// helpers
 let clickNestedMenuItem = function(mainMenuSelector, childMenuSelector) {
   return element(mainMenuSelector).click().then(() => {
     return browser.sleep(timing.openMenu).then(() => {
