@@ -39,6 +39,8 @@ describe('User adds a template to a project', () => {
             // verify we have the 2 deployments in the template
             let deploymentsPage = new DeploymentsPage(project);
             deploymentsPage.visit();
+            // TODO: these are not good tests. The output logs will just say
+            // expected false to be true. Tests should be much more explicit.
             expect(element(by.cssContainingText('td a', 'mongodb')).isPresent()).toBe(true); // TODO: use fixture
             expect(element(by.cssContainingText('td a', 'nodejs-mongodb-example')).isPresent()).toBe(true); // TODO: use fixture
             // verify we have the two services in the template
@@ -66,6 +68,8 @@ describe('User adds a template to a project', () => {
         catalogPage
           .saveTemplate(JSON.stringify(nodeMongoTemplate))
           .then(() => {
+            // TODO: this is not a good test. The output logs will just say
+            // expected false to be true. Tests should be much more explicit.
             // once the template processes, we just have to return
             // to the catalog and verify the tile exists
             catalogPage.visit();

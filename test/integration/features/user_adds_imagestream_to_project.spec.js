@@ -34,6 +34,8 @@ describe('User adds an image stream to a project', () => {
             // verify we have the nodejs image stream loaded
             let imageStreamsPage = new ImageStreamsPage(project);
             imageStreamsPage.visit();
+            // TODO: this is not a good test. The output logs will just say
+            // expected false to be true. Tests should be much more explicit.
             expect(element(by.cssContainingText('td', 'nodejs')).isPresent()).toBe(true); // TODO: use fixture
           });
       });
