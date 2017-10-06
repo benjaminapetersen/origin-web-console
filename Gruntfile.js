@@ -637,15 +637,13 @@ module.exports = function (grunt) {
           // TODO: acceptSslCerts: true, // DELETE ME! SURELY THIS DOESN'T WORK
           suite: grunt.option('suite') || 'full',
           baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-          // browser: grunt.option('browser') ?
-          //           grunt.option('browser') :
-          //           // TODO: enable this again. temporarily always running firefox
-          //           // to debug the cert problem
-          //           // isMac ?
-          //           // 'firefox',
-          //           //   //'chrome' :
-          //           //   'firefox'
-          //           'firefox'
+          browser: grunt.option('browser') ?
+                    grunt.option('browser') :
+                      // // isMac ?
+                      // 'firefox' :
+                      // // running on chrome in CI
+                      // 'chrome'
+                      'chrome'
         }
       },
       // default is the same as above?
@@ -654,15 +652,14 @@ module.exports = function (grunt) {
           configFile: "test/protractor.conf.js",
           args: {
             baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-            // browser: grunt.option('browser') ?
-            //           grunt.option('browser') :
-            //           // TODO: enable this again. temporarily always running firefox
-            //           // to debug the cert problem
-            //           // isMac ?
-            //           // 'firefox',
-            //           //   //'chrome' :
-            //           //   'firefox'
-            //           'firefox'
+            browser: grunt.option('browser') ?
+                      grunt.option('browser') :
+                        // isMac ?
+                        // 'firefox' :
+                        // // running on chrome in CI
+                        // 'chrome'
+                        'chrome'
+
           }
         }
       },
