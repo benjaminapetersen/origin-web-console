@@ -20,6 +20,9 @@ class ProjectList extends Page {
     return element(by.cssContainingText('.tile-target', projectName));
   }
   clickTileBy(projectName) {
+    // TODO: this is an implicit redirect, which typically
+    // returns an instance of the new page. It should
+    // return  new Overview(relevantProject);
     return this.findTileBy(projectName).click();
   }
 }

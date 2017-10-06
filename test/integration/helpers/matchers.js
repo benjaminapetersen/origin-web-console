@@ -8,10 +8,13 @@ exports.expectHeading = (text, level) => {
   expect(element(by.css(level || '.middle h1')).getText()).toEqual(text);
 };
 
-exports.expectPartialHeading = (partialText, level, caseSensitive) => {
+// on some pages we hide help links within the heading.
+// this makes it easier to ignore that text.
+exports.expectPartialHeading = (partialText, caseSensitive, level) => {
   element(by.css(level || '.middle h1')).getText().then((text) => {
+    let toMatch = caseSensitive ? partialText : partialText.toLowerCase();
     text = caseSensitive ? text : text.toLowerCase();
-    expect(text).toContain(partialText);
+    expect(text).toContain(toMatch);
   });
 };
 
@@ -25,4 +28,13 @@ exports.expectElementToBeVisible = (elem) => {
 
 exports.expectElementToBeHidden = (elem) => {
   expect(elem.isDisplayed()).toBeFalsy();
+};
+
+exports.expectPageUrl = (pageUrl) => {
+browser.getCurrentUrl().then((actualUrl) => {
+  // NOTE: this uses contains instead of equals
+  // to avoid worrying about query string inconsistencies, etc.
+  // TODO: update w/flag to assert exact match?
+  expect(actualUrl).toContain(pageUrl);
+});
 };

@@ -20,7 +20,7 @@ class Page {
   // to navigate.  Calling visit essentially performs a
   // browser refresh each time.
   visit() {
-    logger.log('visiting url (refresh):', this.getUrl());
+    logger.log('Visiting url (refresh):', this.getUrl());
     return h.goToPage(this.getUrl()).then(() => {
       // every revisit to a page should pause for rendering
       browser.sleep(1000);
