@@ -13,4 +13,4 @@ script:
   # check the dist before running all the tests to save time
   - hack/verify-dist.sh
   - grunt test-unit
-  - grunt test-e2e --suite=travis
+  - grunt test-integration
