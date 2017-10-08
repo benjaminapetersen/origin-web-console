@@ -14,10 +14,11 @@ class CreateProjectPage extends Page {
     return 'create-project';
   }
 
-  // TODO: there is an implicit navigation here, this should return a new Overview page for clarity
   createProject() {
     return forms.submitNewProjectForm(this.project).then(() => {
-      return new ProjectList();
+      return browser.sleep(timing.implicitRedirect).then(() => {
+        return new ProjectList();
+      });
     });
   }
 }
