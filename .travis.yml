@@ -3,6 +3,8 @@ node_js:
   - "6"
 addons:
   chrome: stable
+before_install:
+  - google-chrome-stable --headless --disable-gpu &
 before_script:
   - make build
   - node ./node_modules/protractor/bin/webdriver-manager update
@@ -13,9 +15,7 @@ before_script:
   # - sh -e /etc/init.d/xvfb start
   # - sleep 3 # give xvfb some time to start
   #
-# setting up google-chrome-stable is before_install, not before_script  
-before_install:
-  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+# setting up google-chrome-stable is before_install, not before_script
 script:
   # check the dist before running all the tests to save time
   - hack/verify-dist.sh
