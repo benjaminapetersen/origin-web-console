@@ -14,6 +14,22 @@ var serveStatic = require('serve-static');
 module.exports = function (grunt) {
   var contextRoot = grunt.option('contextRoot') || "dev-console";
   var isMac = /^darwin/.test(process.platform) || grunt.option('mac');
+  var env = grunt.option('env');
+
+  var unitTestBrowsers = grunt.option('browsers') ?
+                          grunt.option('browsers').split(',') :
+                          // if running locally on mac, we can test both FF & Chrome,
+                          // otherwise use PhantomJS
+                          // TODO: update PhantomJS to Nightmare
+                          isMac ?
+                            ['Firefox', 'Chrome'] :
+                            ['PhantomJS'];
+
+  // travisCI seems to struggle with Chrome. so firefox or alt
+  var e2eTestBrower = grunt.option('browser') || 'chrome';
+  if(env === 'travisCI') {
+    e2eTestBrower = 'firefox';
+  }
 
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt, {
@@ -609,15 +625,7 @@ module.exports = function (grunt) {
         // grunt test
         // grunt test --browsers=Chrome
         // grunt test --browsers=Chrome,Firefox,Safari (be sure karma-<browser_name>-launcher is installed)
-        browsers: grunt.option('browsers') ?
-                    grunt.option('browsers').split(',') :
-                    // if running locally on mac, we can test both FF & Chrome,
-                    // in Travis, just FF
-                    // ['Nightmare'] is a good alt for a current headless
-                    // FIXME: fix this, PhantomJS is deprecated
-                    isMac ?
-                      ['Firefox', 'Chrome'] :
-                      ['PhantomJS']
+        browsers: unitTestBrowsers
       },
       unit: {
         singleRun: true,
@@ -637,13 +645,7 @@ module.exports = function (grunt) {
           // TODO: acceptSslCerts: true, // DELETE ME! SURELY THIS DOESN'T WORK
           suite: grunt.option('suite') || 'full',
           baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-          browser: grunt.option('browser') ?
-                    grunt.option('browser') :
-                      // // isMac ?
-                      // 'firefox' :
-                      // // running on chrome in CI
-                      // 'chrome'
-                      'chrome'
+          browser: e2eTestBrower
         }
       },
       // default is the same as above?
@@ -652,27 +654,10 @@ module.exports = function (grunt) {
           configFile: "test/protractor.conf.js",
           args: {
             baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-            browser: grunt.option('browser') ?
-                      grunt.option('browser') :
-                        // isMac ?
-                        // 'firefox' :
-                        // // running on chrome in CI
-                        // 'chrome'
-                        'chrome'
-
+            browser: e2eTestBrower
           }
         }
-      },
-      // ideally we want to drop this.
-      // mac: {
-      //   options: {
-      //     configFile: "test/protractor-mac.conf.js",
-      //     args: {
-      //       baseUrl: grunt.option('baseUrl') || ("https://localhost:9000/" + contextRoot + "/"),
-      //       browser: grunt.option('browser') || "firefox"
-      //     }
-      //   }
-      // }
+      }
     },
 
     // Settings for grunt-istanbul-coverage
