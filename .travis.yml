@@ -8,11 +8,6 @@ before_install:
 before_script:
   - make build
   # local version of webdriver-manager update
-  - npm run postinstall
-  # global version of webdriver-manager update
-  - webdriver-manager update
-  # maybe it gets going before the update completes?
-  - sleep 3
   # FIXME: figure out if xvfb or chrome-headless is best
   # - https://docs.travis-ci.com/user/gui-and-headless-browsers/
   #
@@ -23,6 +18,12 @@ before_script:
 # setting up google-chrome-stable is before_install, not before_script
 script:
   # check the dist before running all the tests to save time
+  - npm run postinstall
+  # global version of webdriver-manager update
+  - webdriver-manager update
+  # maybe it gets going before the update completes?
+  - sleep 3
+
   - hack/verify-dist.sh
   - grunt test-unit
   - grunt test-integration
