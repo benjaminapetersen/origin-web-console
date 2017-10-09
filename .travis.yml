@@ -5,6 +5,7 @@ addons:
   chrome: stable
 before_script:
   - make build
+  - node ./node_modules/protractor/bin/webdriver-manager update
   # FIXME:
   # This needs to be enabled again when we eliminate PhantomJS for Firefox
   # Even the unit tests require a browser
