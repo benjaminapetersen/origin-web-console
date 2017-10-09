@@ -6,12 +6,14 @@ addons:
 before_script:
   - make build
   - node ./node_modules/protractor/bin/webdriver-manager update
-  # FIXME:
-  # This needs to be enabled again when we eliminate PhantomJS for Firefox
-  # Even the unit tests require a browser
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
-  - sleep 3 # give xvfb some time to start
+  # FIXME: figure out if xvfb or chrome-headless is best
+  # - https://docs.travis-ci.com/user/gui-and-headless-browsers/
+  #
+  # - export DISPLAY=:99.0
+  # - sh -e /etc/init.d/xvfb start
+  # - sleep 3 # give xvfb some time to start
+  #
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
 script:
   # check the dist before running all the tests to save time
   - hack/verify-dist.sh
