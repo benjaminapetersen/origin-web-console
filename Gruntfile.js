@@ -788,7 +788,11 @@ module.exports = function (grunt) {
       ]
   );
 
-  // atm, just a quicker version of the above (maybe)
+  // a quicker version of test-integration, if you have built once,
+  // you should not need to build again to run the tests
+  // privded that you are only changing test files.
+  // TODO: rename or just add flags to `test-integration`, this
+  // doesn't need to be a separate task
   grunt.registerTask('test-e2e', [
     'connect:test',
     'protractor:default'
