@@ -7,7 +7,10 @@ before_install:
   - google-chrome-stable --headless --disable-gpu &
 before_script:
   - make build
-  - node ./node_modules/protractor/bin/webdriver-manager update
+  # local version of webdriver-manager update
+  - npm run postinstall
+  # global version of webdriver-manager update
+  - webdriver-manager update
   # FIXME: figure out if xvfb or chrome-headless is best
   # - https://docs.travis-ci.com/user/gui-and-headless-browsers/
   #
