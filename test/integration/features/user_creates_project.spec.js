@@ -88,6 +88,7 @@ describe('Authenticated user creates a new project', () => {
       browser.sleep(timing.navToPage);
       menus.topNav.clickAbout();
       matchers.expectPartialHeading('Red Hat Openshift');
+
       // Documentation link leaves console
       // Tour Home Page probably deserves it's own test,
       // perhaps in the catalog repo?
