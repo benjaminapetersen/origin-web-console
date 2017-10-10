@@ -14,8 +14,6 @@ var serveStatic = require('serve-static');
 module.exports = function (grunt) {
   var contextRoot = grunt.option('contextRoot') || "dev-console";
   var isMac = /^darwin/.test(process.platform) || grunt.option('mac');
-  var env = grunt.option('env');
-
   var unitTestBrowsers = grunt.option('browsers') ?
                           grunt.option('browsers').split(',') :
                           // if running locally on mac, we can test both FF & Chrome,
@@ -24,12 +22,7 @@ module.exports = function (grunt) {
                           isMac ?
                             ['Firefox', 'Chrome'] :
                             ['PhantomJS'];
-
-  // travisCI seems to struggle with Chrome. so firefox or alt
   var e2eTestBrower = grunt.option('browser') || 'chrome';
-  if(env === 'travisCI') {
-    e2eTestBrower = 'firefox';
-  }
 
   // Load grunt tasks automatically
   require('load-grunt-tasks')(grunt, {
