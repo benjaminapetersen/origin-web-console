@@ -13,6 +13,7 @@ angular.module('openshiftConsole')
                                                 $location,
                                                 $scope,
                                                 $filter,
+                                                APIService,
                                                 BuildsService,
                                                 DataService,
                                                 ImageStreamResolver,
@@ -28,6 +29,11 @@ angular.module('openshiftConsole')
     $scope.renderOptions = $scope.renderOptions || {};
     $scope.renderOptions.showEventsSidebar = true;
     $scope.renderOptions.collapseEventsSidebar = localStorage.getItem('monitoring.eventsidebar.collapsed') === 'true';
+
+    var buildsVersion = APIService.getPreferredVersion('builds');
+    var statefulSetsVersion = APIService.getPreferredVersion('statefulsets');
+    var replicaSetsVersion = APIService.getPreferredVersion('replicasets');
+    var replicationControllersVersion = APIService.getPreferredVersion('replicationcontrollers');
 
     var limitWatches = $filter('isIE')();
     var DEFAULT_POLL_INTERVAL = 60 * 1000; // milliseconds
@@ -292,11 +298,7 @@ angular.module('openshiftConsole')
           Logger.log("pods", $scope.pods);
         }));
 
-        watches.push(DataService.watch({
-          resource: 'statefulsets',
-          group: 'apps',
-          version: 'v1beta1'
-        }, context, function(statefulSets) {
+        watches.push(DataService.watch(statefulSetsVersion, context, function(statefulSets) {
           $scope.statefulSets = statefulSets.by("metadata.name");
           $scope.statefulSetsLoaded = true;
           // _.each($scope.statefulSets, setStatefulSetLogVars); // TODO: enable when we have the endpoint
@@ -304,7 +306,7 @@ angular.module('openshiftConsole')
           Logger.log("statefulSets", $scope.statefulSets);
         }, {poll: limitWatches, pollInterval: DEFAULT_POLL_INTERVAL}));
 
-        watches.push(DataService.watch("replicationcontrollers", context, function(replicationControllers) {
+        watches.push(DataService.watch(replicationControllersVersion, context, function(replicationControllers) {
           $scope.replicationControllers = orderByDate(replicationControllers.by("metadata.name"), true);
           $scope.replicationControllersLoaded = true;
           _.each($scope.replicationControllers, setDeploymentLogVars);
@@ -312,7 +314,7 @@ angular.module('openshiftConsole')
           Logger.log("replicationcontrollers", $scope.replicationControllers);
         }));
 
-        watches.push(DataService.watch("builds", context, function(builds) {
+        watches.push(DataService.watch(buildsVersion, context, function(builds) {
           $scope.builds = orderByDate(builds.by("metadata.name"), true);
           $scope.latestBuildByConfig = BuildsService.latestBuildByConfig($scope.builds);
           $scope.buildsLoaded = true;
@@ -321,7 +323,7 @@ angular.module('openshiftConsole')
           Logger.log("builds", $scope.builds);
         }));
 
-        watches.push(DataService.watch({ group: "extensions", resource: "replicasets" }, context, function(replicaSets) {
+        watches.push(DataService.watch(replicaSetsVersion, context, function(replicaSets) {
           $scope.replicaSets = orderByDate(replicaSets.by("metadata.name"), true);
           $scope.replicaSetsLoaded = true;
           filterReplicaSets();
