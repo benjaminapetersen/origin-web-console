@@ -5,7 +5,7 @@ var N = this, D = t("isIE")();
 e.projectName = a.project;
 var A = a.isHomePage;
 N.catalogLandingPageEnabled = !d.DISABLE_SERVICE_CATALOG_LANDING_PAGE;
-var B = t("annotation"), L = t("canI"), V = t("buildConfigForBuild"), O = t("deploymentIsInProgress"), U = t("imageObjectRef"), F = t("isJenkinsPipelineStrategy"), x = t("isNewerResource"), M = t("label"), q = t("podTemplate"), z = i.getPreferredVersion("deployments"), H = i.getPreferredVersion("horizontalpodautoscalers"), G = i.getPreferredVersion("servicebindings"), K = i.getPreferredVersion("clusterserviceclasses"), W = i.getPreferredVersion("serviceinstances"), Q = i.getPreferredVersion("clusterserviceplans"), J = i.getPreferredVersion("statefulsets"), Y = i.getPreferredVersion("replicasets");
+var B = t("annotation"), L = t("canI"), V = t("buildConfigForBuild"), O = t("deploymentIsInProgress"), U = t("imageObjectRef"), F = t("isJenkinsPipelineStrategy"), x = t("isNewerResource"), M = t("label"), q = t("podTemplate"), z = i.getPreferredVersion("deployments"), H = i.getPreferredVersion("horizontalpodautoscalers"), G = i.getPreferredVersion("servicebindings"), K = i.getPreferredVersion("clusterserviceclasses"), W = i.getPreferredVersion("serviceinstances"), J = i.getPreferredVersion("clusterserviceplans"), Q = i.getPreferredVersion("statefulsets"), Y = i.getPreferredVersion("replicasets");
 N.buildConfigsInstantiateVersion = i.getPreferredVersion("buildconfigs/instantiate");
 var Z, X, ee = {}, te = {}, ne = {}, re = N.state = {
 alerts: {},
@@ -257,7 +257,7 @@ _.each(Ke, function(e, n) {
 e.matches(r) && t.push(re.allServices[n]);
 }), re.servicesByObjectUID[n] = _.sortBy(t, "metadata.name");
 });
-}, Qe = function() {
+}, Je = function() {
 if (re.allServices) {
 Ke = _.mapValues(re.allServices, function(e) {
 return new LabelSelector(e.spec.selector);
@@ -265,7 +265,7 @@ return new LabelSelector(e.spec.selector);
 var e = [ N.deploymentConfigs, N.vanillaReplicationControllers, N.deployments, N.vanillaReplicaSets, N.statefulSets, N.monopods ];
 _.each(e, We), me();
 }
-}, Je = function() {
+}, Qe = function() {
 var e = E.groupByService(N.routes, !0);
 re.routesByService = _.mapValues(e, E.sortRoutesByScore), me();
 }, Ye = function() {
@@ -400,18 +400,18 @@ N.replicaSets = e.by("metadata.name"), Ge(), We(N.vanillaReplicaSets), We(N.mono
 Z = e.by("metadata.uid"), N.deployments = _.sortBy(Z, "metadata.name"), Ge(), We(N.deployments), We(N.vanillaReplicaSets), Oe(N.deployments), ut(), Ce(), S.log("deployments (subscribe)", N.deploymentsByUID);
 })), mt.push(m.watch("builds", r, function(e) {
 re.builds = e.by("metadata.name"), ct(), S.log("builds (subscribe)", re.builds);
-})), mt.push(m.watch(J, r, function(e) {
+})), mt.push(m.watch(Q, r, function(e) {
 N.statefulSets = e.by("metadata.name"), We(N.statefulSets), We(N.monopods), Re(N.statefulSets), Oe(N.statefulSets), ut(), Ce(), S.log("statefulsets (subscribe)", N.statefulSets);
 }, {
 poll: D,
 pollInterval: 6e4
 })), mt.push(m.watch("services", r, function(e) {
-re.allServices = e.by("metadata.name"), Qe(), S.log("services (subscribe)", re.allServices);
+re.allServices = e.by("metadata.name"), Je(), S.log("services (subscribe)", re.allServices);
 }, {
 poll: D,
 pollInterval: 6e4
 })), mt.push(m.watch("routes", r, function(e) {
-N.routes = e.by("metadata.name"), Je(), S.log("routes (subscribe)", N.routes);
+N.routes = e.by("metadata.name"), Qe(), S.log("routes (subscribe)", N.routes);
 }, {
 poll: D,
 pollInterval: 6e4
@@ -455,7 +455,7 @@ delete c[t];
 var t = T.getServicePlanNameForInstance(e);
 if (!t) return n.when();
 var r = _.get(re, [ "servicePlans", t ]);
-return r ? n.when(r) : (c[t] || (c[t] = m.get(Q, t, {}).then(function(e) {
+return r ? n.when(r) : (c[t] || (c[t] = m.get(J, t, {}).then(function(e) {
 return re.servicePlans[t] = e, e;
 }).finally(function() {
 delete c[t];
@@ -3109,40 +3109,50 @@ controller: "SetHomePageModalController"
 }
 };
 } ]), angular.module("openshiftConsole").factory("HPAService", [ "$filter", "$q", "LimitRangesService", "MetricsService", function(e, t, n, r) {
-var a = function(e, t, n) {
+var a = e("annotation"), o = function(e, t, n) {
 return _.every(n, function(n) {
 return _.get(n, [ "resources", t, e ]);
 });
-}, o = function(e, t) {
-return a(e, "requests", t);
 }, i = function(e, t) {
-return a(e, "limits", t);
-}, s = function(e, t, r) {
+return o(e, "requests", t);
+}, s = function(e, t) {
+return o(e, "limits", t);
+}, c = function(e, t, r) {
 return !!n.getEffectiveLimitRange(r, e, "Container")[t];
-}, c = function(e, t) {
-return s(e, "defaultRequest", t);
 }, l = function(e, t) {
-return s(e, "defaultLimit", t);
-}, u = function(e, t, r) {
-return !!n.hasClusterResourceOverrides(r) || (!(!o("cpu", e) && !c("cpu", t)) || !(!i("cpu", e) && !l("cpu", t)));
-}, d = e("humanizeKind"), m = e("hasDeploymentConfig"), p = function(e) {
+return c(e, "defaultRequest", t);
+}, u = function(e, t) {
+return c(e, "defaultLimit", t);
+}, d = function(e, t, r) {
+return !!n.hasClusterResourceOverrides(r) || (!(!i("cpu", e) && !l("cpu", t)) || !(!s("cpu", e) && !u("cpu", t)));
+}, m = e("humanizeKind"), p = e("hasDeploymentConfig"), f = function(e) {
 if (!e) return {
 message: "Metrics might not be configured by your cluster administrator. Metrics are required for autoscaling.",
 reason: "MetricsNotAvailable"
 };
-}, f = function(e, t, n) {
+}, g = function(e, t, n) {
 var r, a = _.get(e, "spec.template.spec.containers", []);
-if (!u(a, t, n)) return r = d(e.kind), {
+if (!d(a, t, n)) return r = m(e.kind), {
 message: "This " + r + " does not have any containers with a CPU request set. Autoscaling will not work without a CPU request.",
 reason: "NoCPURequest"
 };
-}, g = function(e) {
+}, v = function(e) {
+return _.some(e, function(e) {
+return JSON.parse(a(e, "autoscaling.alpha.kubernetes.io/metrics"));
+});
+}, h = function(e, t) {
+var n = _.get(e, "spec.template.spec.containers", []), r = d(n), a = v(t);
+if (!r && a) return {
+message: "The autoscaler attached to this resource uses a newer API. Consider editing this autoscaler with the CLI.",
+reason: "V2Beta1HPA"
+};
+}, y = function(e) {
 if (_.size(e) > 1) return {
 message: "More than one autoscaler is scaling this resource. This is not recommended because they might compete with each other. Consider removing all but one autoscaler.",
 reason: "MultipleHPA"
 };
-}, v = function(e, t) {
-if ("ReplicationController" === e.kind && m(e) && _.some(t, function() {
+}, b = function(e, t) {
+if ("ReplicationController" === e.kind && p(e) && _.some(t, function() {
 return _.some(t, function(e) {
 return "ReplicationController" === _.get(e, "spec.scaleTargetRef.kind");
 });
@@ -3152,7 +3162,10 @@ reason: "DeploymentHasHPA"
 };
 };
 return {
-hasCPURequest: u,
+usesV2Metrics: function(e) {
+return v([ e ]);
+},
+hasCPURequest: d,
 filterHPA: function(e, t, n) {
 return _.filter(e, function(e) {
 return e.spec.scaleTargetRef.kind === t && e.spec.scaleTargetRef.name === n;
@@ -3160,7 +3173,13 @@ return e.spec.scaleTargetRef.kind === t && e.spec.scaleTargetRef.name === n;
 },
 getHPAWarnings: function(e, n, a, o) {
 return !e || _.isEmpty(n) ? t.when([]) : r.isAvailable().then(function(t) {
-return _.compact([ p(t), f(e, a, o), g(n), v(e, n) ]);
+var r = h(e, n);
+return _.compact([ f(t), !r && g(e, a, o), y(n), b(e, n) ]);
+});
+},
+getHPAEditorWarnings: function(e, n, a, o) {
+return !e || _.isEmpty(n) ? t.when([]) : r.isAvailable().then(function(t) {
+return _.compact([ f(t), h(e, n) || g(e, a, o), y(n), b(e, n) ]);
 });
 },
 groupHPAs: function(e) {
@@ -7629,15 +7648,24 @@ var h = function() {
 d.hideNotification("edit-hpa-error");
 };
 e.$on("$destroy", h);
-var y = a.getPreferredVersion("horizontalpodautoscalers"), b = a.getPreferredVersion("limitranges");
+var y = a.getPreferredVersion("horizontalpodautoscalers"), b = a.getPreferredVersion("limitranges"), S = function(e, t, n, r) {
+var o = e.spec.scaleTargetRef, i = a.objectToResourceGroupVersion(o), l = a.getPreferredVersion(i.resource);
+return s.get(l, o.name, r).then(function(r) {
+return c.getHPAEditorWarnings(r, [ e ], t, n).then(function(e) {
+return _.keyBy(e, function(e) {
+return e.reason;
+});
+});
+});
+};
 m.get(n.project).then(_.spread(function(t, r) {
 e.project = t;
-var l = "HorizontalPodAutoscaler" === n.kind ? "update" : "create";
+var c = "HorizontalPodAutoscaler" === n.kind ? "update" : "create";
 if (o.canI({
 resource: "horizontalpodautoscalers",
 group: "autoscaling"
-}, l, n.project)) {
-var m = function() {
+}, c, n.project)) {
+var l = function() {
 e.disableInputs = !0, h();
 var t = {
 apiVersion: "autoscaling/v1",
@@ -7671,7 +7699,7 @@ message: "An error occurred creating the horizontal pod autoscaler.",
 details: g(t)
 });
 });
-}, f = function(t) {
+}, m = function(t) {
 e.disableInputs = !0, (t = angular.copy(t)).metadata.labels = p.mapEntries(p.compactEntries(e.labels)), t.spec.minReplicas = e.autoscaling.minReplicas, t.spec.maxReplicas = e.autoscaling.maxReplicas, t.spec.targetCPUUtilizationPercentage = e.autoscaling.targetCPU, s.update(y, t.metadata.name, t, r).then(function(e) {
 d.addNotification({
 type: "success",
@@ -7685,48 +7713,46 @@ message: "An error occurred creating the horizontal pod autoscaler.",
 details: g(t)
 });
 });
-}, S = {};
-S = "HorizontalPodAutoscaler" === n.kind ? {
+}, f = {};
+f = "HorizontalPodAutoscaler" === n.kind ? {
 resource: "horizontalpodautoscalers",
 group: "autoscaling",
 version: "v1"
 } : {
 resource: a.kindToResource(n.kind),
 group: n.group
-}, s.get(S, n.name, r).then(function(a) {
-if (e.labels = _.map(_.get(a, "metadata.labels", {}), function(e, t) {
+}, s.get(f, n.name, r).then(function(a) {
+e.labels = _.map(_.get(a, "metadata.labels", {}), function(e, t) {
 return {
 name: t,
 value: e
 };
-}), "HorizontalPodAutoscaler" === n.kind) e.targetKind = _.get(a, "spec.scaleTargetRef.kind"), e.targetName = _.get(a, "spec.scaleTargetRef.name"), _.assign(e.autoscaling, {
+}), S(a, {}, t, r).then(function(t) {
+e.warnings = t;
+}), "HorizontalPodAutoscaler" === n.kind ? (e.targetKind = _.get(a, "spec.scaleTargetRef.kind"), e.targetName = _.get(a, "spec.scaleTargetRef.name"), _.assign(e.autoscaling, {
 minReplicas: _.get(a, "spec.minReplicas"),
 maxReplicas: _.get(a, "spec.maxReplicas"),
 targetCPU: _.get(a, "spec.targetCPUUtilizationPercentage")
 }), e.disableInputs = !1, e.save = function() {
-f(a);
+m(a);
 }, e.breadcrumbs = i.getBreadcrumbs({
 name: e.targetName,
 kind: e.targetKind,
 namespace: n.project,
 project: t,
 subpage: "Autoscale"
-}); else {
-e.breadcrumbs = i.getBreadcrumbs({
+})) : (e.breadcrumbs = i.getBreadcrumbs({
 object: a,
 project: t,
 subpage: "Autoscale"
-}), e.save = m;
-var o = {}, l = function() {
-var n = _.get(a, "spec.template.spec.containers", []);
-e.showCPURequestWarning = !c.hasCPURequest(n, o, t);
-};
-s.list(b, r).then(function(e) {
-o = e.by("metadata.name"), l();
+}), e.save = l, s.list(b, r).then(function(n) {
+var o = n.by("metadata.name");
+S(a, o, t, r).then(function(t) {
+e.warnings = t;
 });
-}
+}));
 });
-} else u.toErrorPage("You do not have authority to " + l + " horizontal pod autoscalers in project " + n.project + ".", "access_denied");
+} else u.toErrorPage("You do not have authority to " + c + " horizontal pod autoscalers in project " + n.project + ".", "access_denied");
 }));
 } else u.toErrorPage("Autoscaling not supported for kind " + n.kind + ".");
 } else u.toErrorPage("Kind or name parameter missing.");
@@ -10259,7 +10285,8 @@ restrict: "E",
 scope: {
 autoscaling: "=model",
 showNameInput: "=?",
-nameReadOnly: "=?"
+nameReadOnly: "=?",
+showRequestInput: "=?"
 },
 templateUrl: "views/directives/osc-autoscaling.html",
 link: function(t) {

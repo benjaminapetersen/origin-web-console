@@ -78,6 +78,19 @@ angular.module('openshiftConsole')
     var horizontalPodAutoscalerVersion = APIService.getPreferredVersion('horizontalpodautoscalers');
     var limitRangesVersion = APIService.getPreferredVersion('limitranges');
 
+    var getHPAWarnings = function(resource, limitRanges, project, context) {
+      var scaleTarget = resource.spec.scaleTargetRef;
+      var scaleTargetVersion = APIService.objectToResourceGroupVersion(scaleTarget);
+      // if the DC still has extensions in the verison, it will fail, so we need to
+      // get the preferred version.
+      var scaleTargetPreferredVersion = APIService.getPreferredVersion(scaleTargetVersion.resource);
+      return DataService.get(scaleTargetPreferredVersion, scaleTarget.name, context).then(function(target) {
+        return HPAService.getHPAEditorWarnings(target, [resource], limitRanges, project).then(function(warnings) {
+          return _.keyBy(warnings, 'reason');
+        });
+      });
+    };
+
     ProjectsService
       .get($routeParams.project)
       .then(_.spread(function(project, context) {
@@ -186,6 +199,10 @@ angular.module('openshiftConsole')
                               };
                             });
 
+          getHPAWarnings(resource, {}, project, context).then(function(warnings) {
+            $scope.warnings = warnings;
+          });
+
           // Are we editing an existing HPA?
           if ($routeParams.kind === "HorizontalPodAutoscaler") {
             $scope.targetKind = _.get(resource, 'spec.scaleTargetRef.kind');
@@ -220,17 +237,13 @@ angular.module('openshiftConsole')
             // Create a new HPA.
             $scope.save = createHPA;
 
-            var limitRanges = {};
-            var checkCPURequest = function() {
-              var containers = _.get(resource, 'spec.template.spec.containers', []);
-              $scope.showCPURequestWarning = !HPAService.hasCPURequest(containers, limitRanges, project);
-            };
-
             // List limit ranges in this project to determine if there is a default
             // CPU request for autoscaling.
             DataService.list(limitRangesVersion, context).then(function(resp) {
-              limitRanges = resp.by("metadata.name");
-              checkCPURequest();
+              var limitRanges = resp.by("metadata.name");
+              getHPAWarnings(resource, limitRanges, project, context).then(function(warnings) {
+                $scope.warnings = warnings;
+              });
             });
           }
         });

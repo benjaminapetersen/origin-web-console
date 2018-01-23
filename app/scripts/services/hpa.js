@@ -2,6 +2,9 @@
 
 angular.module("openshiftConsole")
   .factory("HPAService", function($filter, $q, LimitRangesService, MetricsService) {
+
+    var annotation = $filter('annotation');
+
     // Checks if all containers have a value set for the compute resource request or limit.
     //
     // computeResource  - 'cpu' or 'memory'
@@ -99,6 +102,27 @@ angular.module("openshiftConsole")
     };
 
 
+    var hasV2HPAAnnotations = function(hpaResources) {
+      return _.some(hpaResources, function(hpa) {
+        return JSON.parse(annotation(hpa, 'autoscaling.alpha.kubernetes.io/metrics'));
+      });
+    };
+
+
+    var hasV2HPAScalerWarning = function(scaleTarget, hpaResources) {
+      var containers = _.get(scaleTarget, 'spec.template.spec.containers', []);
+      var hasRequest = hasCPURequest(containers);
+      var hasV2HPA = hasV2HPAAnnotations(hpaResources);
+      if(!hasRequest && hasV2HPA) {
+        return {
+          message: 'The autoscaler attached to this resource uses a newer API. ' +
+                   'Consider editing this autoscaler with the CLI.',
+          reason: 'V2Beta1HPA'
+        };
+      }
+    };
+
+
     var hasCompetingAutoscalersWarning = function(hpaResources) {
       if (_.size(hpaResources) > 1) {
         return {
@@ -146,14 +170,36 @@ angular.module("openshiftConsole")
         return $q.when([]);
       }
       return MetricsService.isAvailable().then(function(metricsAvailable) {
+        // we don't need to show this warning, but if we have it, we should also
+        // not show the cpuRequestWarning, until we update to the newer API
+        var hasV2HPAScaleWarning = hasV2HPAScalerWarning(scaleTarget, hpaResources);
+
         return _.compact([
           hasMetricsAvailableWarning(metricsAvailable),
-          hasCPURequestWarning(scaleTarget, limitRanges, project),
+          !(hasV2HPAScaleWarning) || hasCPURequestWarning(scaleTarget, limitRanges, project),
           hasCompetingAutoscalersWarning(hpaResources),
           hasCompetingDCAndAutoscalerWarning(scaleTarget, hpaResources)
         ]);
       });
     };
+
+
+    var getHPAEditorWarnings = function(scaleTarget, hpaResources, limitRanges, project) {
+      if (!scaleTarget || _.isEmpty(hpaResources)) {
+        return $q.when([]);
+      }
+      return MetricsService.isAvailable().then(function(metricsAvailable) {
+        return _.compact([
+          hasMetricsAvailableWarning(metricsAvailable),
+          // for the editor, we can show the v2 warning
+          hasV2HPAScalerWarning(scaleTarget, hpaResources) || hasCPURequestWarning(scaleTarget, limitRanges, project),
+          // hasCPURequestWarning(scaleTarget, limitRanges, project),
+          hasCompetingAutoscalersWarning(hpaResources),
+          hasCompetingDCAndAutoscalerWarning(scaleTarget, hpaResources)
+        ]);
+      });
+    };
+
 
     // Group HPAs by the object they scale.
     //
@@ -185,10 +231,17 @@ angular.module("openshiftConsole")
       return hpaByResource;
     };
 
+    // currently unsupported by the webconsole
+    var usesV2Metrics = function(hpa) {
+      return hasV2HPAAnnotations([hpa]);
+    };
+
     return {
+      usesV2Metrics: usesV2Metrics,
       hasCPURequest: hasCPURequest,
       filterHPA: filterHPA,
       getHPAWarnings: getHPAWarnings,
+      getHPAEditorWarnings: getHPAEditorWarnings,
       groupHPAs: groupHPAs
     };
   });

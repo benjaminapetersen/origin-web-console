@@ -127,10 +127,6 @@ angular.module('openshiftConsole')
             if (files.length > 0 ) {
               scope.file = _.head(files);
               addFile(scope.file);
-            } else {
-              scope.uploadError = true;
-              scope.cleanInputValues();
-              Logger.error("Could not read file", e);
             }
             removeDropZoneClasses();
             $('.drag-and-drop-zone').trigger('putDropZoneFront', false);
@@ -189,8 +185,6 @@ angular.module('openshiftConsole')
               }
               if (!reader.error) {
                 scope.uploadError = false;
-              } else {
-                scope.cleanInputValues();
               }
             });
           };

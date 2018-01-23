@@ -8087,7 +8087,7 @@ angular.module('openshiftConsoleTemplates', []).run(['$templateCache', function(
     "</span>\n" +
     "</div>\n" +
     "</div>\n" +
-    "<div class=\"form-group\">\n" +
+    "<div ng-show=\"showRequestInput\" class=\"form-group\">\n" +
     "<label>\n" +
     "CPU Request Target\n" +
     "</label>\n" +
@@ -9475,17 +9475,17 @@ angular.module('openshiftConsoleTemplates', []).run(['$templateCache', function(
     "<div class=\"help-block\">\n" +
     "Scale replicas automatically based on CPU usage.\n" +
     "</div>\n" +
-    "<div class=\"learn-more-block\" ng-class=\"{ 'gutter-bottom': metricsWarning || showCPURequestWarning }\">\n" +
+    "<div class=\"learn-more-block\" ng-class=\"{ 'gutter-bottom': warnings.MetricsNotAvailable || warnings.NoCPURequest }\">\n" +
     "<a href=\"{{'pod_autoscaling' | helpLink}}\" target=\"_blank\">Learn More&nbsp;<i class=\"fa fa-external-link\" aria-hidden> </i></a>\n" +
     "</div>\n" +
     "\n" +
-    "<div ng-if=\"metricsWarning\" class=\"alert alert-warning\">\n" +
+    "<div ng-if=\"warnings.MetricsNotAvailable\" class=\"alert alert-warning\">\n" +
     "<span class=\"pficon pficon-warning-triangle-o\" aria-hidden=\"true\"></span>\n" +
     "<span class=\"sr-only\">Warning:</span>\n" +
     "Metrics might not be configured by your cluster administrator. Metrics are required for autoscaling.\n" +
     "</div>\n" +
     "\n" +
-    "<div ng-if=\"showCPURequestWarning\" class=\"alert alert-warning\">\n" +
+    "<div ng-if=\"warnings.NoCPURequest\" class=\"alert alert-warning\">\n" +
     "<span class=\"pficon pficon-warning-triangle-o\" aria-hidden=\"true\"></span>\n" +
     "<span class=\"sr-only\">Warning:</span>\n" +
     "This {{targetKind | humanizeKind}} does not have any containers with a CPU\n" +
@@ -9495,8 +9495,15 @@ angular.module('openshiftConsoleTemplates', []).run(['$templateCache', function(
     "<span ng-if=\"'cpu' | isRequestCalculated : project\">limit.</span>\n" +
     "<span ng-if=\"!('cpu' | isRequestCalculated : project)\">request.</span>\n" +
     "</div>\n" +
+    "\n" +
+    "<div ng-if=\"warnings.V2Beta1HPA\" class=\"alert alert-warning\">\n" +
+    "<span class=\"pficon pficon-warning-triangle-o\" aria-hidden=\"true\"></span>\n" +
+    "<span class=\"sr-only\">Warning:</span>\n" +
+    "This autoscaler uses a newer API, consider editing it with the\n" +
+    "<a href=\"command-line\" target=\"_blank\">command line tools</a>.\n" +
+    "</div>\n" +
     "<fieldset ng-disabled=\"disableInputs\" class=\"gutter-top\">\n" +
-    "<osc-autoscaling model=\"autoscaling\" show-name-input=\"true\" name-read-only=\"kind === 'HorizontalPodAutoscaler'\">\n" +
+    "<osc-autoscaling model=\"autoscaling\" show-name-input=\"true\" name-read-only=\"kind === 'HorizontalPodAutoscaler'\" show-request-input=\"!(usesV2Metrics)\">\n" +
     "</osc-autoscaling>\n" +
     "<label-editor labels=\"labels\" expand=\"true\" can-toggle=\"false\"></label-editor>\n" +
     "<div class=\"buttons gutter-top gutter-bottom\">\n" +
