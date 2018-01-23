@@ -189,7 +189,6 @@ angular.module('openshiftConsole')
 
 
           $scope.showV2Beta1Warning = HPAService.isUnsupportedAPI(resource);
-          console.log('show cpu request warning?', $scope.showV2Beta1Warning);
 
           // Are we editing an existing HPA?
           if ($routeParams.kind === "HorizontalPodAutoscaler") {
