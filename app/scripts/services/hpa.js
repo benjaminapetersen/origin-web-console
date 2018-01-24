@@ -121,15 +121,6 @@ angular.module("openshiftConsole")
       }
     };
 
-    // TODO: decide if these checks need to be mutually exclusive, and
-    // handled via a mediator function, or if we can just show both of the
-    // warnings & let the user decide how to proceed.
-    // var foo = function(scaleTarget, hpaResources, limitRanges, project) {
-    //   return hasV2HPAScaler(scaleTarget, hpaResources) ?
-    //           hasV2HPAScaler(scaleTarget, hpaResources) :
-    //           return hasCPURequestWarning(scaleTarget, limitRanges, project);
-    // };
-
 
     var hasCompetingAutoscalersWarning = function(hpaResources) {
       if (_.size(hpaResources) > 1) {
@@ -178,12 +169,10 @@ angular.module("openshiftConsole")
         return $q.when([]);
       }
       return MetricsService.isAvailable().then(function(metricsAvailable) {
+        var v2HPAWarning = hasV2HPAScaler(scaleTarget, hpaResources);
         return _.compact([
           hasMetricsAvailableWarning(metricsAvailable),
-          // TODO: cpuRequest is no longer necessary with v2beta1 api,
-          // scaling can happen on other resources.
-          hasCPURequestWarning(scaleTarget, limitRanges, project),
-          hasV2HPAScaler(scaleTarget, hpaResources),
+          v2HPAWarning ? v2HPAWarning : hasCPURequestWarning(scaleTarget, limitRanges, project),
           hasCompetingAutoscalersWarning(hpaResources),
           hasCompetingDCAndAutoscalerWarning(scaleTarget, hpaResources)
         ]);
